@@ -4,9 +4,11 @@ import com.techelevator.tenmo.model.AuthenticatedUser;
 import com.techelevator.tenmo.model.Balance;
 import com.techelevator.tenmo.model.User;
 import com.techelevator.tenmo.model.UserCredentials;
+import com.techelevator.tenmo.services.AccountService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.AuthenticationServiceException;
 import com.techelevator.view.ConsoleService;
+import io.cucumber.java.bs.A;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -33,17 +35,17 @@ private static final String API_BASE_URL = "http://localhost:8080/";
     private AuthenticatedUser currentUser;
     private ConsoleService console;
     private AuthenticationService authenticationService;
-	private RestTemplate restTemplate;
+	private AccountService accountService;
 
     public static void main(String[] args) {
-    	App app = new App(new ConsoleService(System.in, System.out), new AuthenticationService(API_BASE_URL));
+    	App app = new App(new ConsoleService(System.in, System.out), new AuthenticationService(API_BASE_URL), new AccountService(API_BASE_URL));
     	app.run();
     }
 
-    public App(ConsoleService console, AuthenticationService authenticationService) {
+    public App(ConsoleService console, AuthenticationService authenticationService, AccountService accountService) {
 		this.console = console;
 		this.authenticationService = authenticationService;
-		this.restTemplate = new RestTemplate();
+		this.accountService = accountService;
 	}
 
 	public void run() {
@@ -80,7 +82,8 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	private void viewCurrentBalance() {
 		// TODO Auto-generated method stub
 
-		Balance balance = restTemplate.exchange(API_BASE_URL+"balance",HttpMethod.GET,makeAuthEntity(), Balance.class).getBody();
+//		Balance balance = restTemplate.exchange(API_BASE_URL+"balance",HttpMethod.GET,makeAuthEntity(), Balance.class).getBody();
+		Balance balance = accountService.getUserBalance(currentUser.getToken());
 		System.out.println("Your current account balance is: $"+balance.getBalance());
 	}
 
@@ -96,8 +99,17 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 	private void sendBucks() {
 		// TODO Auto-generated method stub
-		User[] allUsers = restTemplate.exchange(API_BASE_URL+"users",HttpMethod.GET,makeAuthEntity(), User[].class).getBody();
-		String choice = (String) console.getChoiceFromOptions(allUsers);
+		User[] allUsers = accountService.getAllAvailableUsers(currentUser.getToken());
+		System.out.println("-------------------------------------------");
+		System.out.println("Users");
+		System.out.println("ID            Name");
+		System.out.println("-------------------------------------------");
+		console.getChoiceFromOptions(allUsers);
+		System.out.println("---------");
+		System.out.print("Enter ID of user you are sending to (0 to cancel): ");
+
+//		User[] allUsers = restTemplate.exchange(API_BASE_URL+"users",HttpMethod.GET,makeAuthEntity(), User[].class).getBody();
+//		String choice = (String) console.getChoiceFromOptions(allUsers);
 		
 	}
 
