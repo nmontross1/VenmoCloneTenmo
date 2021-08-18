@@ -1,9 +1,6 @@
 package com.techelevator.tenmo;
 
-import com.techelevator.tenmo.model.AuthenticatedUser;
-import com.techelevator.tenmo.model.Balance;
-import com.techelevator.tenmo.model.User;
-import com.techelevator.tenmo.model.UserCredentials;
+import com.techelevator.tenmo.model.*;
 import com.techelevator.tenmo.services.AccountService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.AuthenticationServiceException;
@@ -14,6 +11,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 public class App {
@@ -99,14 +98,49 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 	private void sendBucks() {
 		// TODO Auto-generated method stub
-		User[] allUsers = accountService.getAllAvailableUsers(currentUser.getToken());
-		System.out.println("-------------------------------------------");
-		System.out.println("Users");
-		System.out.println("ID            Name");
-		System.out.println("-------------------------------------------");
-		console.getChoiceFromOptions(allUsers);
-		System.out.println("---------");
-		System.out.print("Enter ID of user you are sending to (0 to cancel): ");
+		boolean shouldCotinue = true;
+		while(shouldCotinue) {
+			User[] allUsers = accountService.getAllAvailableUsers(currentUser.getToken());
+			System.out.println("-------------------------------------------");
+			System.out.println("Users");
+			System.out.println("ID            Name");
+			System.out.println("-------------------------------------------");
+			System.out.println("Enter ID of user you are sending to (0 to cancel):");
+			User choice =  (User)console.getChoiceFromOptions(allUsers);
+
+			//TODO HANDLE EXIST
+			if (choice.equals("0")) {
+				shouldCotinue = false;
+			}
+			boolean askForAmount= true;
+			BigDecimal amount = null;
+			while(askForAmount) {
+				try {
+					String input = console.getUserInput("Enter the amount");
+					amount = new BigDecimal(input).setScale(2, RoundingMode.HALF_UP);
+					if(amount.compareTo(new BigDecimal("0.00")) == 0 ||amount.compareTo(new BigDecimal("0.00")) == -1 )
+						System.out.println("Please enter a number greater than 0");
+					else{
+						askForAmount = false;
+					}
+				}catch (Exception e){
+					System.out.println("Please enter a number");
+				}
+
+
+			}
+			Transfer transfer = new Transfer();
+			transfer.setAccount_from(currentUser.getUser().getId());
+			transfer.setAccount_to(choice.getId());
+			transfer.setTransfer_status_id(2);
+			transfer.setTransfer_type_id(2);
+			transfer.setAmount(amount);
+
+			accountService.sendAmount(transfer, currentUser.getToken());
+
+
+
+		}
 
 //		User[] allUsers = restTemplate.exchange(API_BASE_URL+"users",HttpMethod.GET,makeAuthEntity(), User[].class).getBody();
 //		String choice = (String) console.getChoiceFromOptions(allUsers);
