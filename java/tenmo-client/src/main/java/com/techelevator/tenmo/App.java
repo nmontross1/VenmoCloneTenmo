@@ -76,12 +76,9 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 	private void viewCurrentBalance() {
 		// TODO Auto-generated method stub
-		System.out.println(currentUser.getToken());
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setBearerAuth(currentUser.getToken());
-		HttpEntity entity = new HttpEntity(httpHeaders);
-		Balance balance = restTemplate.exchange(API_BASE_URL+"balance",HttpMethod.GET,entity, Balance.class).getBody();
-		System.out.println(balance.getBalance());
+
+		Balance balance = restTemplate.exchange(API_BASE_URL+"balance",HttpMethod.GET,makeAuthEntity(), Balance.class).getBody();
+		System.out.println("Your current account balance is: $"+balance.getBalance());
 	}
 
 	private void viewTransferHistory() {
@@ -162,5 +159,14 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		String username = console.getUserInput("Username");
 		String password = console.getUserInput("Password");
 		return new UserCredentials(username, password);
+	}
+
+
+	private HttpEntity makeAuthEntity(){
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setBearerAuth(currentUser.getToken());
+		HttpEntity entity = new HttpEntity(httpHeaders);
+
+		return entity;
 	}
 }
