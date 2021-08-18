@@ -36,7 +36,7 @@ public class AccountService {
     }
 
     public ResponseEntity<Transfer> sendAmount(Transfer transfer, String token){
-       return restTemplate.exchange(baseUrl+"",HttpMethod.POST, makeTransferEntity(transfer, token), Transfer.class);
+       return restTemplate.exchange(baseUrl+"sendmoney",HttpMethod.POST, makeTransferEntity(transfer, token), Transfer.class);
     }
 
     private HttpEntity makeAuthEntity(String token){

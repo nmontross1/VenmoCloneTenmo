@@ -60,3 +60,4 @@ public class Transfer {
         this.amount = amount;
     }
 }
+

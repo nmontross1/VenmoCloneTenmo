@@ -130,8 +130,8 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 			}
 			Transfer transfer = new Transfer();
-			transfer.setAccount_from(currentUser.getUser().getId());
-			transfer.setAccount_to(choice.getId());
+			transfer.setAccount_from(currentUser.getUser().getUsername());
+			transfer.setAccount_to(choice.getUsername());
 			transfer.setTransfer_status_id(2);
 			transfer.setTransfer_type_id(2);
 			transfer.setAmount(amount);

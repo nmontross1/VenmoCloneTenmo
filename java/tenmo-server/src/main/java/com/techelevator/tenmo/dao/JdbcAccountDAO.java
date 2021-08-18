@@ -32,4 +32,22 @@ public class JdbcAccountDAO implements AccountDAO {
 
         return balance;
     }
+
+    @Override
+    public Balance updateBalance(int user, BigDecimal amount) {
+        Balance balance = null;
+        String query = "update accounts set balance = ? where user_id = ?";
+        jdbcTemplate.update(query, amount, user);
+        String query2 =  "select username from users where user_id = ?";
+ //       jdbcTemplate.update(query2, user, amount);
+        SqlRowSet results = jdbcTemplate.queryForRowSet(query2, user);
+
+        if(results.next()){
+            String username = results.getString("username");
+            balance = getBalance(username);
+        }
+        return balance;
+    }
+
+
 }
