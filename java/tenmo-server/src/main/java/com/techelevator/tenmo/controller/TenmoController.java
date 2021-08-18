@@ -2,10 +2,12 @@ package com.techelevator.tenmo.controller;
 
 import com.techelevator.tenmo.dao.AccountDAO;
 import com.techelevator.tenmo.dao.UserDao;
+import com.techelevator.tenmo.exceptions.InsufficientBalanceException;
 import com.techelevator.tenmo.model.Balance;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +31,7 @@ public class TenmoController {
         return accountDAOao.getBalance(principal.getName());
     }
 
+
     @RequestMapping(path = "/users", method = RequestMethod.GET)
     public List<User> getAllUser( Principal principal){
         List<User> filteredList = new ArrayList<>();
@@ -43,8 +46,9 @@ public class TenmoController {
         return filteredList;
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(path = "/sendmoney", method = RequestMethod.POST)
-    public Transfer sendMoney(@RequestBody Transfer transfer){
+    public Transfer sendMoney(@RequestBody Transfer transfer) throws InsufficientBalanceException {
       //  return userDao.findIdByUsername(username);
         int fromUserId = userDao.findIdByUsername(transfer.getAccount_from());
         int toUserId = userDao.findIdByUsername(transfer.getAccount_to());
