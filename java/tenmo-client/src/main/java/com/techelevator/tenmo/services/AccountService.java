@@ -1,9 +1,12 @@
 package com.techelevator.tenmo.services;
 
 import com.techelevator.tenmo.model.*;
+import com.techelevator.view.ConsoleService;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 public class AccountService {
@@ -15,12 +18,20 @@ public class AccountService {
     public AccountService(String baseUrl) {
         this.baseUrl = baseUrl;
         this.restTemplate = new RestTemplate();
+
     }
 
     public Balance getUserBalance(){
-        Balance balance = restTemplate.exchange(baseUrl+"balance", HttpMethod.GET,makeAuthEntity(), Balance.class).getBody();
+        Balance balance = null;
+        try {
+            balance = restTemplate.exchange(baseUrl + "balance", HttpMethod.GET, makeAuthEntity(), Balance.class).getBody();
+            return balance;
+        } catch (RestClientResponseException ex){
+            System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
+        } catch (ResourceAccessException ex){
+            System.out.println(ex.getMessage());
+        }
         return balance;
-
     }
 
     public User[] getAllAvailableUsers(){
@@ -30,32 +41,69 @@ public class AccountService {
     }
 
     public User getUserDetails(int userId){
-        return  restTemplate.exchange(baseUrl+"users/"+userId,HttpMethod.GET,makeAuthEntity(), User.class).getBody();
-
+        User user = null;
+        try {
+            user = restTemplate.exchange(baseUrl+"users/"+userId,HttpMethod.GET,makeAuthEntity(), User.class).getBody();
+        } catch (RestClientResponseException ex){
+            System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
+        } catch (ResourceAccessException ex){
+            System.out.println(ex.getMessage());
+        }
+        return user;
     }
 
     public Account getAccountById(int accountId){
-        return  restTemplate.exchange(baseUrl+"accounts/"+accountId,HttpMethod.GET,makeAuthEntity(), Account.class).getBody();
-
+        Account account = null;
+        try {
+            account = restTemplate.exchange(baseUrl+"accounts/"+accountId,HttpMethod.GET,makeAuthEntity(), Account.class).getBody();
+        } catch (RestClientResponseException ex){
+            System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
+        } catch (ResourceAccessException ex){
+            System.out.println(ex.getMessage());
+        }
+        return account;
     }
 
 
     public Account getAccountInfo(int userid){
-        Account account = restTemplate.exchange(baseUrl+"account?userid="+userid,HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
+        Account account = null;
+        try {
+            account = restTemplate.exchange(baseUrl+"account?userid="+userid,HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
+        } catch (RestClientResponseException ex){
+            System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
+        } catch (ResourceAccessException ex){
+            System.out.println(ex.getMessage());
+        }
         return account;
     }
 
     public Transfer sendAmount(Transfer transfer){
-       return restTemplate.exchange(baseUrl+"sendmoney",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
+        Transfer transfers = null;
+        try{
+            transfers = restTemplate.exchange(baseUrl+"sendmoney",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
+        } catch (RestClientResponseException ex){
+            System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
+        } catch (ResourceAccessException ex){
+            System.out.println(ex.getMessage());
+        }
+        return transfers;
     }
 
     public TransferSummary[] getTransferSummary(int accountId){
         TransferSummary[] transferSummaries = restTemplate.exchange(baseUrl+"account/"+accountId+"/transfers",HttpMethod.GET,makeAuthEntity(), TransferSummary[].class).getBody();
-            return transferSummaries;
+        return transferSummaries;
     }
 
     public Transfer getTransferInfo(int transferId){
-      return restTemplate.exchange(baseUrl+"transfers/"+transferId,HttpMethod.GET, makeAuthEntity(), Transfer.class).getBody();
+        Transfer transfer = null;
+        try{
+            transfer = restTemplate.exchange(baseUrl+"transfers/"+transferId,HttpMethod.GET, makeAuthEntity(), Transfer.class).getBody();
+        } catch (RestClientResponseException ex){
+            System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
+        } catch (ResourceAccessException ex){
+            System.out.println(ex.getMessage());
+        }
+        return transfer;
     }
 
     public static void setAuthToken(String token){

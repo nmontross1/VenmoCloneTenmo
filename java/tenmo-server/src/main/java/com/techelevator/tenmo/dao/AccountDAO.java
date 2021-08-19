@@ -1,6 +1,7 @@
 package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.exceptions.InsufficientBalanceException;
+import com.techelevator.tenmo.exceptions.UserNotFoundException;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Balance;
 
@@ -12,12 +13,12 @@ public interface AccountDAO {
 
     List<Account> findAll();
 
-    Balance getBalance(String user);
+    Balance getBalance(String user) throws UserNotFoundException;
 
     //#TODO MAKE ACCOUNT NOT FOUND EXCEPTION
-    Account getAccountByUserId(int userId);
+    Account getAccountByUserId(int userId) throws UserNotFoundException;
 
-    Balance updateBalance(long userId, BigDecimal amount) throws InsufficientBalanceException;
+    Balance updateBalance(long userId, BigDecimal amount) throws InsufficientBalanceException, UserNotFoundException;
 
 
 }

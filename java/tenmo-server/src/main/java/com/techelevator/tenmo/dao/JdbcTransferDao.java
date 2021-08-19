@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.dao;
 
+import com.techelevator.tenmo.exceptions.TransferNotFoundException;
 import com.techelevator.tenmo.model.TransferSummary;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
@@ -26,13 +27,14 @@ public class JdbcTransferDao implements TransferDao{
 
 
     @Override
-    public Transfer getTransfer(long id) {
+    public Transfer getTransfer(long id) throws TransferNotFoundException {
         String query = "Select transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount From transfers Where transfer_id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(query, id);
         if (rowSet.next()){
             return mapRowToUser(rowSet);
+        } else {
+            throw new TransferNotFoundException();
         }
-        return null;
     }
 
     @Override
@@ -50,7 +52,7 @@ public class JdbcTransferDao implements TransferDao{
 
 
     @Override
-    public Transfer createTransfer(Transfer transfer) {
+    public Transfer createTransfer(Transfer transfer) throws TransferNotFoundException {
         String query = "insert into transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount) values(?,?,?,?,?) RETURNING transfer_id;";
 
         Long id = jdbcTemplate.queryForObject(query,Long.class, transfer.getTransfer_type_id(),transfer.getTransfer_status_id(),transfer.getAccount_from(),transfer.getAccount_to(),transfer.getAmount());

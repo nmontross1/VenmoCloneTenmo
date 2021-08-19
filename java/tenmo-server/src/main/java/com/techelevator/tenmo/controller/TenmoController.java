@@ -4,6 +4,8 @@ import com.techelevator.tenmo.dao.AccountDAO;
 import com.techelevator.tenmo.dao.TransferDao;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.exceptions.InsufficientBalanceException;
+import com.techelevator.tenmo.exceptions.TransferNotFoundException;
+import com.techelevator.tenmo.exceptions.UserNotFoundException;
 import com.techelevator.tenmo.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,13 +30,13 @@ public class TenmoController {
     TransferDao transferDao;
 
     @RequestMapping(path = "/balance", method = RequestMethod.GET)
-    public Balance getBalance(Principal principal){
+    public Balance getBalance(Principal principal) throws UserNotFoundException{
 
         return accountDAOao.getBalance(principal.getName());
     }
 
     @RequestMapping(path="/account")
-    public Account getAccount(@RequestParam int userid){
+    public Account getAccount(@RequestParam int userid) throws UserNotFoundException {
         return accountDAOao.getAccountByUserId(userid);
     }
 
@@ -79,7 +81,7 @@ public class TenmoController {
     }
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(path = "/sendmoney", method = RequestMethod.POST)
-    public Transfer sendMoney(@RequestBody Transfer transfer) throws InsufficientBalanceException {
+    public Transfer sendMoney(@RequestBody Transfer transfer) throws InsufficientBalanceException, UserNotFoundException {
 
         User fromUser = userDao.findUserByAccountId(transfer.getAccount_from());
         User toUser = userDao.findUserByAccountId(transfer.getAccount_to());
@@ -106,7 +108,7 @@ public class TenmoController {
     }
 
     @RequestMapping(path = "/transfers/{transferId}", method = RequestMethod.GET)
-    public Transfer getTransferDetails(@PathVariable int transferId){
+    public Transfer getTransferDetails(@PathVariable int transferId) throws TransferNotFoundException {
         return transferDao.getTransfer(transferId);
     }
 

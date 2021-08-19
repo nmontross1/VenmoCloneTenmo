@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.dao;
 
+import com.techelevator.tenmo.exceptions.TransferNotFoundException;
 import com.techelevator.tenmo.model.TransferSummary;
 import com.techelevator.tenmo.model.Transfer;
 
@@ -7,10 +8,10 @@ import java.util.List;
 
 public interface TransferDao {
 
-    Transfer getTransfer(long id);
+    Transfer getTransfer(long id) throws TransferNotFoundException;
 
     List<TransferSummary> getTransactionsByAccountId(int accountId);
 
-    Transfer createTransfer(Transfer transfer);
+    Transfer createTransfer(Transfer transfer) throws TransferNotFoundException;
 
 }

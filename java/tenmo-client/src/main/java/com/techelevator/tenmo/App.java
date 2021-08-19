@@ -97,17 +97,21 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				break;
 			}
 			Transfer transfer = accountService.getTransferInfo(response);
-			System.out.println("--------------------------------------------");
-			System.out.println("Transfer Details");
-			System.out.println("--------------------------------------------");
-			System.out.println("Id: " + transfer.getTransfer_id());
-			String fromUserName =  accountService.getUserDetails( accountService.getAccountById(transfer.getAccount_from()).getUserid()).getUsername();
-			String toUserName =  accountService.getUserDetails( accountService.getAccountById(transfer.getAccount_to()).getUserid()).getUsername();
-			System.out.println("From: " + fromUserName);
-			System.out.println("To: "+toUserName);
-			System.out.println("Type: " + (transfer.getTransfer_type_id()== 2? "Send": "Request"));
-			System.out.println("Status: " +(transfer.getTransfer_status_id() == 1? "Pending" : transfer.getTransfer_status_id() == 2? "Approved":"Rejected"));
-			System.out.println("Amount: " + transfer.getAmount());
+			if(transfer != null) {
+				System.out.println("--------------------------------------------");
+				System.out.println("Transfer Details");
+				System.out.println("--------------------------------------------");
+				System.out.println("Id: " + transfer.getTransfer_id());
+				String fromUserName = accountService.getUserDetails(accountService.getAccountById(transfer.getAccount_from()).getUserid()).getUsername();
+				String toUserName = accountService.getUserDetails(accountService.getAccountById(transfer.getAccount_to()).getUserid()).getUsername();
+				System.out.println("From: " + fromUserName);
+				System.out.println("To: " + toUserName);
+				System.out.println("Type: " + (transfer.getTransfer_type_id() == 2 ? "Send" : "Request"));
+				System.out.println("Status: " + (transfer.getTransfer_status_id() == 1 ? "Pending" : transfer.getTransfer_status_id() == 2 ? "Approved" : "Rejected"));
+				System.out.println("Amount: " + transfer.getAmount());
+			} else {
+				System.out.println("Invalid Transfer ID. Please enter a valid Transfer ID.");
+			}
 
 
 		}
@@ -127,7 +131,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			System.out.println("-------------------------------------------");
 			console.displayMenuOptions(allUsers);
 
-			int choice = console.getUserInputInteger("Enter ID of user you are sending to (0 to cancel):");
+			int choice = console.getUserInputInteger("Enter ID of user you are sending to (0 to cancel)");
 
 			if (choice == 0) {
 				shouldCotinue = false;
@@ -149,19 +153,28 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 
 			}
-	//	try {
+
 			Account fromAccount = accountService.getAccountInfo(currentUser.getUser().getId());
 			Account toAccount = accountService.getAccountInfo(choice);
-			Transfer transfer = new Transfer();
-			transfer.setAccount_from(fromAccount.getAccountId());
-			transfer.setAccount_to(toAccount.getAccountId());
-			transfer.setTransfer_status_id(2);
-			transfer.setTransfer_type_id(2);
-			transfer.setAmount(amount);
+			if(fromAccount != null && toAccount != null) {
+				Transfer transfer = new Transfer();
+				transfer.setAccount_from(fromAccount.getAccountId());
+				transfer.setAccount_to(toAccount.getAccountId());
+				transfer.setTransfer_status_id(2);
+				transfer.setTransfer_type_id(2);
+				transfer.setAmount(amount);
 
-			transfer = accountService.sendAmount(transfer);
-			shouldCotinue = false;
-	//	}
+				transfer = accountService.sendAmount(transfer);
+				shouldCotinue = false;
+			} else {
+				if(toAccount == null){
+					System.out.println(choice + " is not a valid ID. Please enter a valid ID.");
+				}
+				if(fromAccount == null){
+					System.out.println(currentUser.getUser().getId() + " is not a valid ID. Please enter a valid ID.");
+				}
+			}
+
 
 
 
