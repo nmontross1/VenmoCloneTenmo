@@ -1,15 +1,10 @@
 package com.techelevator.tenmo.services;
 
 import com.techelevator.tenmo.model.*;
-import io.cucumber.core.internal.gherkin.Token;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
-
-import java.math.BigDecimal;
-import java.util.List;
 
 public class AccountService {
 
@@ -43,9 +38,13 @@ public class AccountService {
        return restTemplate.exchange(baseUrl+"sendmoney",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
     }
 
-    public Transaction[] getTransactions(int accountId){
-        Transaction[] transactions = restTemplate.exchange(baseUrl+"account/"+accountId+"/transfers",HttpMethod.GET,makeAuthEntity(), Transaction[].class).getBody();
-            return transactions;
+    public TransferSummary[] getTransferSummary(int accountId){
+        TransferSummary[] transferSummaries = restTemplate.exchange(baseUrl+"account/"+accountId+"/transfers",HttpMethod.GET,makeAuthEntity(), TransferSummary[].class).getBody();
+            return transferSummaries;
+    }
+
+    public Transfer getTransferInfo(int transferId){
+      return restTemplate.exchange(baseUrl+"transfers/"+transferId,HttpMethod.GET, makeAuthEntity(), Transfer.class).getBody();
     }
 
     public static void setAuthToken(String token){

@@ -75,9 +75,14 @@ public class TenmoController {
     }
 
     @RequestMapping(path = "/account/{accountId}/transfers", method = RequestMethod.GET)
-    public List<Transaction> transferList(@PathVariable int accountId){
+    public List<TransferSummary> transferList(@PathVariable int accountId){
         return transferDao.getTransactionsByAccountId(accountId);
 
+    }
+
+    @RequestMapping(path = "/transfers/{transferId}", method = RequestMethod.GET)
+    public Transfer getTransferDetails(@PathVariable int transferId){
+        return transferDao.getTransfer(transferId);
     }
 
 

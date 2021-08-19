@@ -1,6 +1,6 @@
 package com.techelevator.tenmo.dao;
 
-import com.techelevator.tenmo.model.Transaction;
+import com.techelevator.tenmo.model.TransferSummary;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,15 +36,15 @@ public class JdbcTransferDao implements TransferDao{
     }
 
     @Override
-    public List<Transaction> getTransactionsByAccountId(int accountId) {
-        List<Transaction> transactions = new ArrayList<>();
+    public List<TransferSummary> getTransactionsByAccountId(int accountId) {
+        List<TransferSummary> transferSummaries = new ArrayList<>();
         String query = "SELECT transfer_id, transfer_type_id, account_from, transfer_status_id, account_to, amount FROM transfers JOIN accounts ON transfers.account_from = accounts.account_id JOIN users ON accounts.user_id = users.user_id WHERE account_to = ? OR account_from = ?;";
         SqlRowSet results = jdbcTemplate.queryForRowSet(query,accountId,accountId);
         while(results.next()){
-            transactions.add(mapRowToTransaction(results));
+            transferSummaries.add(mapRowToTransaction(results, accountId));
         }
 
-        return transactions;
+        return transferSummaries;
     }
 
 
@@ -57,24 +57,24 @@ public class JdbcTransferDao implements TransferDao{
         return getTransfer(id);
     }
 
-    private Transaction mapRowToTransaction(SqlRowSet rs){
-        Transaction transaction = new Transaction();
-        transaction.setTransfer_id(rs.getInt("transfer_id"));
-        int transferType = rs.getInt("transfer_type_id");
-        if(transferType == 2){
+    private TransferSummary mapRowToTransaction(SqlRowSet rs, int accountId){
+        TransferSummary transferSummary = new TransferSummary();
+        transferSummary.setTransfer_id(rs.getInt("transfer_id"));
+        int initiator = rs.getInt("account_from");
+        if(initiator == accountId){
             User user  = userDao.findUserByAccountId(rs.getInt("account_to"));
-            transaction.setDirection("To");
-            transaction.setUsername(user.getUsername());
-            transaction.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
+            transferSummary.setDirection("To");
+            transferSummary.setUsername(user.getUsername());
+            transferSummary.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
 
         }
         else{
             User user  = userDao.findUserByAccountId(rs.getInt("account_from"));
-            transaction.setDirection("From");
-            transaction.setUsername(user.getUsername());
-            transaction.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
+            transferSummary.setDirection("From");
+            transferSummary.setUsername(user.getUsername());
+            transferSummary.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
         }
-        return transaction;
+        return transferSummary;
 
     }
 

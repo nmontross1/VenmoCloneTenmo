@@ -5,15 +5,9 @@ import com.techelevator.tenmo.services.AccountService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.AuthenticationServiceException;
 import com.techelevator.view.ConsoleService;
-import io.cucumber.java.bs.A;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.List;
 
 public class App {
 
@@ -91,16 +85,31 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		boolean shouldCotinue = true;
 		while (shouldCotinue) {
 			Account userAccount = accountService.getAccountInfo(currentUser.getUser().getId());
-			Transaction[] allTransactions = accountService.getTransactions(userAccount.getAccountId());
+			TransferSummary[] allTransferSummaries = accountService.getTransferSummary(userAccount.getAccountId());
 			System.out.println("-------------------------------------------");
 			System.out.println("Transfers");
 			System.out.println("ID          From/To                 Amount");
 			System.out.println("-------------------------------------------");
-			for(Transaction transaction : allTransactions){
-				System.out.println(transaction.getTransfer_id()+"          "+transaction.getDirection()+": "+transaction.getUsername()+"    $"+transaction.getAmount());
+			for(TransferSummary transferSummary : allTransferSummaries){
+				System.out.println(transferSummary.getTransfer_id()+"          "+ transferSummary.getDirection()+": "+ transferSummary.getUsername()+"    $"+ transferSummary.getAmount());
 			}
 
-			console.getUserInput("Please enter transfer ID to view details (0 to cancel): ");
+			int response = console.getUserInputInteger("Please enter transfer ID to view details (0 to cancel): ");
+			if (response == 0){
+				shouldCotinue = false;
+			}
+			Transfer transfer = accountService.getTransferInfo(response);
+			System.out.println("--------------------------------------------");
+			System.out.println("Transfer Details");
+			System.out.println("--------------------------------------------");
+			System.out.println("Id: " + transfer.getTransfer_id());
+			System.out.println("From: ");
+			System.out.println("To: ");
+			System.out.println("Type: " + transfer.getTransfer_type_id());
+			System.out.println("Status: " + transfer.getTransfer_status_id());
+			System.out.println("Amount: " + transfer.getAmount());
+
+
 		}
 	}
 	private void viewPendingRequests() {

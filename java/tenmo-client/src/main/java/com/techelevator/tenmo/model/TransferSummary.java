@@ -2,7 +2,7 @@ package com.techelevator.tenmo.model;
 
 import java.math.BigDecimal;
 
-public class Transaction {
+public class TransferSummary {
 
     int transfer_id;
     String direction;
