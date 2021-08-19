@@ -73,9 +73,6 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void viewCurrentBalance() {
-		// TODO Auto-generated method stub
-
-//		Balance balance = restTemplate.exchange(API_BASE_URL+"balance",HttpMethod.GET,makeAuthEntity(), Balance.class).getBody();
 		Balance balance = accountService.getUserBalance();
 		System.out.println("Your current account balance is: $"+balance.getBalance());
 	}
@@ -97,16 +94,19 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			int response = console.getUserInputInteger("Please enter transfer ID to view details (0 to cancel): ");
 			if (response == 0){
 				shouldCotinue = false;
+				break;
 			}
 			Transfer transfer = accountService.getTransferInfo(response);
 			System.out.println("--------------------------------------------");
 			System.out.println("Transfer Details");
 			System.out.println("--------------------------------------------");
 			System.out.println("Id: " + transfer.getTransfer_id());
-			System.out.println("From: ");
-			System.out.println("To: ");
-			System.out.println("Type: " + transfer.getTransfer_type_id());
-			System.out.println("Status: " + transfer.getTransfer_status_id());
+			String fromUserName =  accountService.getUserDetails( accountService.getAccountById(transfer.getAccount_from()).getUserid()).getUsername();
+			String toUserName =  accountService.getUserDetails( accountService.getAccountById(transfer.getAccount_to()).getUserid()).getUsername();
+			System.out.println("From: " + fromUserName);
+			System.out.println("To: "+toUserName);
+			System.out.println("Type: " + (transfer.getTransfer_type_id()== 2? "Send": "Request"));
+			System.out.println("Status: " +(transfer.getTransfer_status_id() == 1? "Pending" : transfer.getTransfer_status_id() == 2? "Approved":"Rejected"));
 			System.out.println("Amount: " + transfer.getAmount());
 
 
@@ -118,7 +118,6 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void sendBucks() {
-		// TODO Auto-generated method stub
 		boolean shouldCotinue = true;
 		while(shouldCotinue) {
 			User[] allUsers = accountService.getAllAvailableUsers();
@@ -126,19 +125,19 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			System.out.println("Users");
 			System.out.println("ID            Name");
 			System.out.println("-------------------------------------------");
-			System.out.println("Enter ID of user you are sending to (0 to cancel):");
-			User choice =  (User)console.getChoiceFromOptions(allUsers);
+			console.displayMenuOptions(allUsers);
 
-			//TODO HANDLE 0 option
-			if (choice.equals("0")) {
+			int choice = console.getUserInputInteger("Enter ID of user you are sending to (0 to cancel):");
+
+			if (choice == 0) {
 				shouldCotinue = false;
+				break;
 			}
 			boolean askForAmount= true;
-			BigDecimal amount = null;
+			BigDecimal amount =  null;
 			while(askForAmount) {
+				 amount = new BigDecimal(console.getUserInputInteger("Enter the amount")).setScale(2, RoundingMode.HALF_UP);;
 				try {
-					String input = console.getUserInput("Enter the amount");
-					amount = new BigDecimal(input).setScale(2, RoundingMode.HALF_UP);
 					if(amount.compareTo(new BigDecimal("0.00")) == 0 ||amount.compareTo(new BigDecimal("0.00")) == -1 )
 						System.out.println("Please enter a number greater than 0");
 					else{
@@ -150,9 +149,9 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 
 			}
-
+	//	try {
 			Account fromAccount = accountService.getAccountInfo(currentUser.getUser().getId());
-			Account toAccount =  accountService.getAccountInfo(choice.getId());
+			Account toAccount = accountService.getAccountInfo(choice);
 			Transfer transfer = new Transfer();
 			transfer.setAccount_from(fromAccount.getAccountId());
 			transfer.setAccount_to(toAccount.getAccountId());
@@ -161,9 +160,8 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			transfer.setAmount(amount);
 
 			transfer = accountService.sendAmount(transfer);
-			System.out.println(transfer);
 			shouldCotinue = false;
-
+	//	}
 
 
 

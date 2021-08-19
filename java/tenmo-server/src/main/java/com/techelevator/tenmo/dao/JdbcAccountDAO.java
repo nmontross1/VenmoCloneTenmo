@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class JdbcAccountDAO implements AccountDAO {
@@ -20,6 +22,23 @@ public class JdbcAccountDAO implements AccountDAO {
         this.jdbcTemplate = new JdbcTemplate(ds);
     }
 
+
+    @Override
+    public List<Account> findAll() {
+        List<Account> accounts = new ArrayList<>();
+        String query = "SELECT account_id , user_id, balance from accounts";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(query);
+
+        while(results.next()){
+          Account  account = new Account();
+            account.setAccountId(results.getInt("account_id"));
+            account.setUserid(results.getInt("user_id"));
+            account.setBalance(new BigDecimal(results.getString("balance")).setScale(2, RoundingMode.HALF_UP));
+            accounts.add(account);
+        }
+
+        return accounts;
+    }
 
     @Override
     public Balance getBalance(String user) {

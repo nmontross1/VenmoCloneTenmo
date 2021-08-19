@@ -29,6 +29,17 @@ public class AccountService {
 
     }
 
+    public User getUserDetails(int userId){
+        return  restTemplate.exchange(baseUrl+"users/"+userId,HttpMethod.GET,makeAuthEntity(), User.class).getBody();
+
+    }
+
+    public Account getAccountById(int accountId){
+        return  restTemplate.exchange(baseUrl+"accounts/"+accountId,HttpMethod.GET,makeAuthEntity(), Account.class).getBody();
+
+    }
+
+
     public Account getAccountInfo(int userid){
         Account account = restTemplate.exchange(baseUrl+"account?userid="+userid,HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
         return account;

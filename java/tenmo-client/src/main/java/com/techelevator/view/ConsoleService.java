@@ -43,7 +43,7 @@ public class ConsoleService {
 		return choice;
 	}
 
-	private void displayMenuOptions(Object[] options) {
+	public  void displayMenuOptions(Object[] options) {
 		out.println();
 		for (int i = 0; i < options.length; i++) {
 			int optionNum = i + 1;
@@ -54,15 +54,6 @@ public class ConsoleService {
 	}
 
 
-	public void displayMenuOptions(Object[] options, String message) {
-		out.println();
-		for (int i = 0; i < options.length; i++) {
-			int optionNum = i + 1;
-			out.println(optionNum + ") " + options[i]);
-		}
-		out.print(System.lineSeparator() + message);
-		out.flush();
-	}
 	public String getUserInput(String prompt) {
 		out.print(prompt+": ");
 		out.flush();

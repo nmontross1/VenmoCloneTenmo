@@ -38,6 +38,19 @@ public class TenmoController {
         return accountDAOao.getAccountByUserId(userid);
     }
 
+    @RequestMapping(path="/accounts/{accountId}")
+    public Account getAccountById(@PathVariable int accountId){
+        Account returnValue  = null;
+        for (Account account : accountDAOao.findAll()){
+            if(account.getAccountId() == accountId){
+                returnValue = account;
+                break;
+            }
+        }
+
+        return returnValue;
+    }
+
     @RequestMapping(path = "/users", method = RequestMethod.GET)
     public List<User> getAllUser( Principal principal){
         List<User> filteredList = new ArrayList<>();
@@ -52,6 +65,18 @@ public class TenmoController {
         return filteredList;
     }
 
+    @RequestMapping(path = "/users/{userId}", method = RequestMethod.GET)
+    public User getAllUser( @PathVariable int userId){
+        User returnValue  = null;
+        for (User user : userDao.findAll()){
+            if(user.getId() == userId){
+                returnValue = user;
+                break;
+            }
+        }
+
+        return returnValue;
+    }
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(path = "/sendmoney", method = RequestMethod.POST)
     public Transfer sendMoney(@RequestBody Transfer transfer) throws InsufficientBalanceException {
