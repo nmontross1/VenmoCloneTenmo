@@ -82,7 +82,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		// TODO Auto-generated method stub
 
 //		Balance balance = restTemplate.exchange(API_BASE_URL+"balance",HttpMethod.GET,makeAuthEntity(), Balance.class).getBody();
-		Balance balance = accountService.getUserBalance(currentUser.getToken());
+		Balance balance = accountService.getUserBalance();
 		System.out.println("Your current account balance is: $"+balance.getBalance());
 	}
 
@@ -100,7 +100,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		// TODO Auto-generated method stub
 		boolean shouldCotinue = true;
 		while(shouldCotinue) {
-			User[] allUsers = accountService.getAllAvailableUsers(currentUser.getToken());
+			User[] allUsers = accountService.getAllAvailableUsers();
 			System.out.println("-------------------------------------------");
 			System.out.println("Users");
 			System.out.println("ID            Name");
@@ -136,7 +136,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			transfer.setTransfer_type_id(2);
 			transfer.setAmount(amount);
 
-			accountService.sendAmount(transfer, currentUser.getToken());
+			accountService.sendAmount(transfer);
 
 
 
@@ -199,6 +199,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			UserCredentials credentials = collectUserCredentials();
 		    try {
 				currentUser = authenticationService.login(credentials);
+				AccountService.AUTH_TOKEN = currentUser.getToken();
 			} catch (AuthenticationServiceException e) {
 				System.out.println("LOGIN ERROR: "+e.getMessage());
 				System.out.println("Please attempt to login again.");
@@ -213,11 +214,5 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 
-	private HttpEntity makeAuthEntity(){
-		HttpHeaders httpHeaders = new HttpHeaders();
-		httpHeaders.setBearerAuth(currentUser.getToken());
-		HttpEntity entity = new HttpEntity(httpHeaders);
 
-		return entity;
-	}
 }

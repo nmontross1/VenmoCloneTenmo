@@ -15,6 +15,7 @@ import java.util.List;
 
 public class AccountService {
 
+    public static String AUTH_TOKEN = "";
     private RestTemplate restTemplate;
     private String baseUrl;
 
@@ -23,34 +24,34 @@ public class AccountService {
         this.restTemplate = new RestTemplate();
     }
 
-    public Balance getUserBalance(String token){
-        Balance balance = restTemplate.exchange(baseUrl+"balance", HttpMethod.GET,makeAuthEntity(token), Balance.class).getBody();
+    public Balance getUserBalance(){
+        Balance balance = restTemplate.exchange(baseUrl+"balance", HttpMethod.GET,makeAuthEntity(), Balance.class).getBody();
         return balance;
 
     }
 
-    public User[] getAllAvailableUsers(String token){
-        User[] allUsers = restTemplate.exchange(baseUrl+"users",HttpMethod.GET,makeAuthEntity(token), User[].class).getBody();
+    public User[] getAllAvailableUsers(){
+        User[] allUsers = restTemplate.exchange(baseUrl+"users",HttpMethod.GET,makeAuthEntity(), User[].class).getBody();
         return allUsers;
 
     }
 
-    public ResponseEntity<Transfer> sendAmount(Transfer transfer, String token){
-       return restTemplate.exchange(baseUrl+"sendmoney",HttpMethod.POST, makeTransferEntity(transfer, token), Transfer.class);
+    public ResponseEntity<Transfer> sendAmount(Transfer transfer){
+       return restTemplate.exchange(baseUrl+"sendmoney",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class);
     }
 
-    private HttpEntity makeAuthEntity(String token){
+    private HttpEntity makeAuthEntity(){
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setBearerAuth(token);
+        httpHeaders.setBearerAuth(AUTH_TOKEN);
         HttpEntity entity = new HttpEntity(httpHeaders);
 
         return entity;
     }
 
 
-    private HttpEntity<Transfer> makeTransferEntity(Transfer transfer, String token){
+    private HttpEntity<Transfer> makeTransferEntity(Transfer transfer){
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setBearerAuth(token);
+        httpHeaders.setBearerAuth(AUTH_TOKEN);
         HttpEntity entity = new HttpEntity(transfer, httpHeaders);
         return  entity;
     }
