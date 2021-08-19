@@ -4,6 +4,7 @@ import com.techelevator.tenmo.model.AuthenticatedUser;
 import com.techelevator.tenmo.model.Balance;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
+import io.cucumber.core.internal.gherkin.Token;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class AccountService {
 
-    public static String AUTH_TOKEN = "";
+    private static String AUTH_TOKEN = "";
     private RestTemplate restTemplate;
     private String baseUrl;
 
@@ -38,6 +39,10 @@ public class AccountService {
 
     public ResponseEntity<Transfer> sendAmount(Transfer transfer){
        return restTemplate.exchange(baseUrl+"sendmoney",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class);
+    }
+
+    public static void setAuthToken(String token){
+        AUTH_TOKEN = token;
     }
 
     private HttpEntity makeAuthEntity(){

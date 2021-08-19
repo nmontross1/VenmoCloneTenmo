@@ -199,7 +199,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			UserCredentials credentials = collectUserCredentials();
 		    try {
 				currentUser = authenticationService.login(credentials);
-				AccountService.AUTH_TOKEN = currentUser.getToken();
+				AccountService.setAuthToken(currentUser.getToken());
 			} catch (AuthenticationServiceException e) {
 				System.out.println("LOGIN ERROR: "+e.getMessage());
 				System.out.println("Please attempt to login again.");
