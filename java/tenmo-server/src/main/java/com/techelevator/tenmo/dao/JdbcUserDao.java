@@ -34,6 +34,17 @@ public class JdbcUserDao implements UserDao {
     }
 
     @Override
+    public User findUserByAccountId(int accountId) {
+       User user = null;
+        String query = "Select users.user_id, username from users join accounts on users.user_id = accounts.user_id where account_id = ?";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(query, accountId);
+        if(results.next()){
+            user = mapRowToUserWithoutHash(results);
+        }
+        return user;
+    }
+
+    @Override
     public List<User> findAll() {
         List<User> users = new ArrayList<>();
         String sql = "SELECT user_id, username, password_hash FROM users;";
@@ -86,6 +97,15 @@ public class JdbcUserDao implements UserDao {
         user.setPassword(rs.getString("password_hash"));
         user.setActivated(true);
         user.setAuthorities("USER");
+        return user;
+    }
+
+
+
+    private User mapRowToUserWithoutHash(SqlRowSet rs) {
+        User user = new User();
+        user.setId(rs.getLong("user_id"));
+        user.setUsername(rs.getString("username"));
         return user;
     }
 }

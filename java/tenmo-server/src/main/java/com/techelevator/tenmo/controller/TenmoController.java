@@ -1,8 +1,10 @@
 package com.techelevator.tenmo.controller;
 
 import com.techelevator.tenmo.dao.AccountDAO;
+import com.techelevator.tenmo.dao.TransferDao;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.exceptions.InsufficientBalanceException;
+import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Balance;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
@@ -25,12 +27,19 @@ public class TenmoController {
     @Autowired
     UserDao userDao;
 
+    @Autowired
+    TransferDao transferDao;
+
     @RequestMapping(path = "/balance", method = RequestMethod.GET)
     public Balance getBalance(Principal principal){
 
         return accountDAOao.getBalance(principal.getName());
     }
 
+    @RequestMapping(path="/account")
+    public Account getAccount(@RequestParam int userid){
+        return accountDAOao.getAccountByUserId(userid);
+    }
 
     @RequestMapping(path = "/users", method = RequestMethod.GET)
     public List<User> getAllUser( Principal principal){
@@ -49,22 +58,25 @@ public class TenmoController {
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(path = "/sendmoney", method = RequestMethod.POST)
     public Transfer sendMoney(@RequestBody Transfer transfer) throws InsufficientBalanceException {
-      //  return userDao.findIdByUsername(username);
-        int fromUserId = userDao.findIdByUsername(transfer.getAccount_from());
-        int toUserId = userDao.findIdByUsername(transfer.getAccount_to());
-        if(toUserId != -1){
-            Balance balance = accountDAOao.getBalance(transfer.getAccount_from());
+
+        User fromUser = userDao.findUserByAccountId(transfer.getAccount_from());
+        User toUser = userDao.findUserByAccountId(transfer.getAccount_to());
+        Transfer returnValue = null;
+            Balance balance = accountDAOao.getBalance(fromUser.getUsername());
             if(balance.getBalance().compareTo(transfer.getAmount()) >= 0){
                 //Create update balance method
                 BigDecimal diff = balance.getBalance().subtract(transfer.getAmount());
-                accountDAOao.updateBalance(fromUserId, diff);
-                BigDecimal sum = accountDAOao.getBalance(transfer.getAccount_to()).getBalance().add(transfer.getAmount());
-                accountDAOao.updateBalance(toUserId, sum);
+                accountDAOao.updateBalance(fromUser.getId(), diff);
+                BigDecimal sum = accountDAOao.getBalance(toUser.getUsername()).getBalance().add(transfer.getAmount());
+                accountDAOao.updateBalance(toUser.getId(), sum);
+                returnValue =  transferDao.createTransfer(transfer);
+
             }
 
-        }
-        return null;
+
+        return returnValue;
     }
+
 
 
 }

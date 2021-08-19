@@ -108,7 +108,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			System.out.println("Enter ID of user you are sending to (0 to cancel):");
 			User choice =  (User)console.getChoiceFromOptions(allUsers);
 
-			//TODO HANDLE EXIST
+			//TODO HANDLE 0 option
 			if (choice.equals("0")) {
 				shouldCotinue = false;
 			}
@@ -129,9 +129,12 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 
 			}
+
+			Account fromAccount = accountService.getAccountInfo(currentUser.getUser().getId());
+			Account toAccount =  accountService.getAccountInfo(choice.getId());
 			Transfer transfer = new Transfer();
-			transfer.setAccount_from(currentUser.getUser().getUsername());
-			transfer.setAccount_to(choice.getUsername());
+			transfer.setAccount_from(fromAccount.getAccountId());
+			transfer.setAccount_to(toAccount.getAccountId());
 			transfer.setTransfer_status_id(2);
 			transfer.setTransfer_type_id(2);
 			transfer.setAmount(amount);
