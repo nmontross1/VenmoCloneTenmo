@@ -88,14 +88,21 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 	private void viewTransferHistory() {
 		// TODO Auto-generated method stub
-		System.out.println("-------------------------------------------");
-		System.out.println("Transfers");
-		System.out.println("ID          From/To                 Amount");
-		System.out.println("-------------------------------------------");
+		boolean shouldCotinue = true;
+		while (shouldCotinue) {
+			Account userAccount = accountService.getAccountInfo(currentUser.getUser().getId());
+			Transaction[] allTransactions = accountService.getTransactions(userAccount.getAccountId());
+			System.out.println("-------------------------------------------");
+			System.out.println("Transfers");
+			System.out.println("ID          From/To                 Amount");
+			System.out.println("-------------------------------------------");
+			for(Transaction transaction : allTransactions){
+				System.out.println(transaction.getTransfer_id()+"          "+transaction.getDirection()+": "+transaction.getUsername()+"    $"+transaction.getAmount());
+			}
 
-		
+			console.getUserInput("Please enter transfer ID to view details (0 to cancel): ");
+		}
 	}
-
 	private void viewPendingRequests() {
 		// TODO Auto-generated method stub
 		

@@ -4,10 +4,7 @@ import com.techelevator.tenmo.dao.AccountDAO;
 import com.techelevator.tenmo.dao.TransferDao;
 import com.techelevator.tenmo.dao.UserDao;
 import com.techelevator.tenmo.exceptions.InsufficientBalanceException;
-import com.techelevator.tenmo.model.Account;
-import com.techelevator.tenmo.model.Balance;
-import com.techelevator.tenmo.model.Transfer;
-import com.techelevator.tenmo.model.User;
+import com.techelevator.tenmo.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -78,8 +75,8 @@ public class TenmoController {
     }
 
     @RequestMapping(path = "/account/{accountId}/transfers", method = RequestMethod.GET)
-    public List<Transfer> transferList(@PathVariable int accountId){
-        return null;
+    public List<Transaction> transferList(@PathVariable int accountId){
+        return transferDao.getTransactionsByAccountId(accountId);
 
     }
 

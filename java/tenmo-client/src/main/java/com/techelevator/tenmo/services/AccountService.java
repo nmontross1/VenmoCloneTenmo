@@ -43,6 +43,11 @@ public class AccountService {
        return restTemplate.exchange(baseUrl+"sendmoney",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
     }
 
+    public Transaction[] getTransactions(int accountId){
+        Transaction[] transactions = restTemplate.exchange(baseUrl+"account/"+accountId+"/transfers",HttpMethod.GET,makeAuthEntity(), Transaction[].class).getBody();
+            return transactions;
+    }
+
     public static void setAuthToken(String token){
         AUTH_TOKEN = token;
     }

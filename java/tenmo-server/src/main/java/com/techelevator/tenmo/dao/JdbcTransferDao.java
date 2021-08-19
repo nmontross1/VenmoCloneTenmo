@@ -1,6 +1,5 @@
 package com.techelevator.tenmo.dao;
 
-import com.techelevator.tenmo.model.Balance;
 import com.techelevator.tenmo.model.Transaction;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
@@ -11,14 +10,16 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class JdbcTransferDao implements TransferDao{
     private JdbcTemplate jdbcTemplate;
-
-    public JdbcTransferDao(DataSource ds) {
+    private UserDao userDao;
+    public JdbcTransferDao(DataSource ds , UserDao userDao) {
         this.jdbcTemplate = new JdbcTemplate(ds);
+        this.userDao = userDao;
     }
 
 
@@ -35,13 +36,19 @@ public class JdbcTransferDao implements TransferDao{
     }
 
     @Override
-    public List<Transfer> getTransfersByAccountId(int accountId) {
-        String query = "SELECT transfer_id, account_from, transfer_status_id, account_to, amount FROM transfers JOIN accounts ON transfers.account_from = accounts.account_id JOIN users ON accounts.user_id = users.user_id WHERE account_to = ? OR account_from = ?;";
-        return null;
+    public List<Transaction> getTransactionsByAccountId(int accountId) {
+        List<Transaction> transactions = new ArrayList<>();
+        String query = "SELECT transfer_id, transfer_type_id, account_from, transfer_status_id, account_to, amount FROM transfers JOIN accounts ON transfers.account_from = accounts.account_id JOIN users ON accounts.user_id = users.user_id WHERE account_to = ? OR account_from = ?;";
+        SqlRowSet results = jdbcTemplate.queryForRowSet(query,accountId,accountId);
+        while(results.next()){
+            transactions.add(mapRowToTransaction(results));
+        }
+
+        return transactions;
     }
 
 
-    //#TODO FINSIH IMPLEMENTATION DID NOT TEST METHOD YET.
+
     @Override
     public Transfer createTransfer(Transfer transfer) {
         String query = "insert into transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount) values(?,?,?,?,?) RETURNING transfer_id;";
@@ -53,10 +60,20 @@ public class JdbcTransferDao implements TransferDao{
     private Transaction mapRowToTransaction(SqlRowSet rs){
         Transaction transaction = new Transaction();
         transaction.setTransfer_id(rs.getInt("transfer_id"));
-        transaction.setTransfer_status_id(rs.getInt("transfer_status_id"));
-        transaction.setAccount_from_id(rs.getInt("account_from"));
-        transaction.setAccount_to_id(rs.getInt("account_to"));
-        transaction.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
+        int transferType = rs.getInt("transfer_type_id");
+        if(transferType == 2){
+            User user  = userDao.findUserByAccountId(rs.getInt("account_to"));
+            transaction.setDirection("To");
+            transaction.setUsername(user.getUsername());
+            transaction.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
+
+        }
+        else{
+            User user  = userDao.findUserByAccountId(rs.getInt("account_from"));
+            transaction.setDirection("From");
+            transaction.setUsername(user.getUsername());
+            transaction.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
+        }
         return transaction;
 
     }
