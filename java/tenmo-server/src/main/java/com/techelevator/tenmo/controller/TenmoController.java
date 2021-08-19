@@ -77,6 +77,12 @@ public class TenmoController {
         return returnValue;
     }
 
+    @RequestMapping(path = "/account/{accountId}/transfers", method = RequestMethod.GET)
+    public List<Transfer> transferList(@PathVariable int accountId){
+        return null;
+
+    }
+
 
 
 }

@@ -39,8 +39,8 @@ public class AccountService {
         return account;
     }
 
-    public ResponseEntity<Transfer> sendAmount(Transfer transfer){
-       return restTemplate.exchange(baseUrl+"sendmoney",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class);
+    public Transfer sendAmount(Transfer transfer){
+       return restTemplate.exchange(baseUrl+"sendmoney",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
     }
 
     public static void setAuthToken(String token){

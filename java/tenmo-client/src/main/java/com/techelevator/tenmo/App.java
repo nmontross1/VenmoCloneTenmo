@@ -88,6 +88,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 	private void viewTransferHistory() {
 		// TODO Auto-generated method stub
+		System.out.println("-------------------------------------------");
+		System.out.println("Transfers");
+		System.out.println("ID          From/To                 Amount");
+		System.out.println("-------------------------------------------");
+
 		
 	}
 
@@ -139,7 +144,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			transfer.setTransfer_type_id(2);
 			transfer.setAmount(amount);
 
-			accountService.sendAmount(transfer);
+			transfer = accountService.sendAmount(transfer);
+			System.out.println(transfer);
+			shouldCotinue = false;
+
+
 
 
 
