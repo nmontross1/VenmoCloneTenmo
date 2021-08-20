@@ -77,7 +77,6 @@ public class JdbcAccountDAO implements AccountDAO {
         String query = "update accounts set balance = ? where user_id = ?";
         jdbcTemplate.update(query, amount, user);
         String query2 =  "select username from users where user_id = ?";
- //       jdbcTemplate.update(query2, user, amount);
         SqlRowSet results = jdbcTemplate.queryForRowSet(query2, user);
 
         if(results.next()){

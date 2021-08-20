@@ -94,6 +94,8 @@ public class TenmoController {
                 accountDAOao.updateBalance(toUser.getId(), sum);
                 returnValue =  transferDao.createTransfer(transfer);
 
+            }else{
+                throw new InsufficientBalanceException();
             }
 
 
