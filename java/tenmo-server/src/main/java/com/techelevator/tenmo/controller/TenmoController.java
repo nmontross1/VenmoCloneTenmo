@@ -101,8 +101,26 @@ public class TenmoController {
             }
 
         }
-        else{
-            returnValue = transferDao.createTransfer(transfer);
+        else{//Request
+            if(transfer.getTransferStatusId() == 1) { //Pending
+                returnValue = transferDao.createTransfer(transfer);
+            }else if(transfer.getTransferStatusId()==2){ //If approved - change balance and update
+                Balance balance = accountDAOao.getBalance(fromUser.getUsername());
+                if (balance.getBalance().compareTo(transfer.getAmount()) >= 0) {
+                    BigDecimal diff = balance.getBalance().subtract(transfer.getAmount());
+                    accountDAOao.updateBalance(fromUser.getId(), diff);
+                    BigDecimal sum = accountDAOao.getBalance(toUser.getUsername()).getBalance().add(transfer.getAmount());
+                    accountDAOao.updateBalance(toUser.getId(), sum);
+                    returnValue = transferDao.updateTransfer(transfer);
+
+                } else {
+                    throw new InsufficientBalanceException();
+                }
+            }
+            else { // it was rejected
+                returnValue = transferDao.updateTransfer(transfer);
+            }
+
         }
 
         return returnValue;

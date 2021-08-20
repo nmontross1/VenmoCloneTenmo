@@ -58,20 +58,27 @@ public class JdbcTransferDao implements TransferDao{
         return getTransfer(id);
     }
 
-
-/*
-    private Transfer mapRowToTransfer(SqlRowSet rs) {
-        Transfer transfer = new Transfer();
-        transfer.setTransferId(rs.getInt("transfer_id"));
-        transfer.setTransferTypeId(rs.getInt("transfer_type_id"));
-        transfer.setTransferStatusId(rs.getInt("transfer_status_id"));
-        transfer.setAccountFrom(rs.getInt("account_from"));
-        transfer.setAccountTo(rs.getInt("account_to"));
-        transfer.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
-        return transfer;
+    @Override
+    public Transfer updateTransfer(Transfer transfer) throws TransferNotFoundException {
+        String query = "Update transfers set transfer_status_id = ? where transfer_id = ? RETURNING transfer_id;";
+        Long id = jdbcTemplate.queryForObject(query,Long.class, transfer.getTransferStatusId(),transfer.getTransferId());
+        return getTransfer(id);
     }
 
-*/
+
+    /*
+        private Transfer mapRowToTransfer(SqlRowSet rs) {
+            Transfer transfer = new Transfer();
+            transfer.setTransferId(rs.getInt("transfer_id"));
+            transfer.setTransferTypeId(rs.getInt("transfer_type_id"));
+            transfer.setTransferStatusId(rs.getInt("transfer_status_id"));
+            transfer.setAccountFrom(rs.getInt("account_from"));
+            transfer.setAccountTo(rs.getInt("account_to"));
+            transfer.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
+            return transfer;
+        }
+
+    */
     private Transfer mapRowToTransfer(SqlRowSet rs) {
         Transfer transfer = new Transfer();
         transfer.setTransferId(rs.getInt("transfer_id"));

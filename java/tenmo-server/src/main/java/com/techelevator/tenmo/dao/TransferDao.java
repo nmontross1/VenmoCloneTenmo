@@ -13,4 +13,6 @@ public interface TransferDao {
 
     Transfer createTransfer(Transfer transfer) throws TransferNotFoundException;
 
+    Transfer updateTransfer(Transfer transfer) throws TransferNotFoundException;
+
 }

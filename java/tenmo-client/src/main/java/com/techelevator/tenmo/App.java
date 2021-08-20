@@ -146,7 +146,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			}
 			Transfer transfer = accountService.getTransferInfo(response);
 			if (transfer != null) {
-				boolean shouldLoop = false;
+				boolean shouldLoop = true;
 				while (shouldLoop) {
 					System.out.println("1: Approve");
 					System.out.println("2: Reject");
@@ -157,6 +157,9 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 						shouldLoop = false;
 					} else if (selection == 1){
 						transfer.setTransferStatusId(2);
+						accountService.sendTransfer(transfer);
+					} else if(selection == 2){
+						transfer.setTransferStatusId(3);
 						accountService.sendTransfer(transfer);
 					}
 				}
