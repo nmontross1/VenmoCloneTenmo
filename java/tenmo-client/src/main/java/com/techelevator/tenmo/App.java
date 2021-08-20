@@ -146,18 +146,24 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			}
 			Transfer transfer = accountService.getTransferInfo(response);
 			if (transfer != null) {
-				System.out.println("--------------------------------------------");
-				System.out.println("Transfer Details");
-				System.out.println("--------------------------------------------");
-				System.out.println("Id: " + transfer.getTransferId());
-				System.out.println("From: " + transfer.getFromUserName());
-				System.out.println("To: " + transfer.getToUserName());
-				System.out.println("Type: " + (transfer.getTransferTypeId() == 2 ? "Send" : "Request"));
-				System.out.println("Status: " + (transfer.getTransferStatusId() == 1 ? "Pending" : transfer.getTransferStatusId() == 2 ? "Approved" : "Rejected"));
-				System.out.println("Amount: " + transfer.getAmount());
+				boolean shouldLoop = false;
+				while (shouldLoop) {
+					System.out.println("1: Approve");
+					System.out.println("2: Reject");
+					System.out.println("0: Don't Approve or reject");
+					System.out.println("---------");
+					int selection = console.getUserInputInteger("Please choose an option");
+					if(selection == 0){
+						shouldLoop = false;
+					} else if (selection == 1){
+						transfer.setTransferStatusId(2);
+						accountService.sendTransfer(transfer);
+					}
+				}
 			} else {
 				System.out.println("Invalid Transfer ID. Please enter a valid Transfer ID.");
 			}
+
 		}
 
 		}

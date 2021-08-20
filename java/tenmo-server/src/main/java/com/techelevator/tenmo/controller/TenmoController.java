@@ -87,7 +87,7 @@ public class TenmoController {
         User toUser = userDao.findUserByAccountId(transfer.getAccountTo());
         Transfer returnValue = null;
 
-        if(transfer.getTransferTypeId() == 2) {//If Send Request
+        if(transfer.getTransferTypeId() == 2) {//If Send
             Balance balance = accountDAOao.getBalance(fromUser.getUsername());
             if (balance.getBalance().compareTo(transfer.getAmount()) >= 0) {
                 BigDecimal diff = balance.getBalance().subtract(transfer.getAmount());
