@@ -15,7 +15,6 @@ public interface AccountDAO {
 
     Balance getBalance(String user) throws UserNotFoundException;
 
-    //#TODO MAKE ACCOUNT NOT FOUND EXCEPTION
     Account getAccountByUserId(int userId) throws UserNotFoundException;
 
     Balance updateBalance(long userId, BigDecimal amount) throws InsufficientBalanceException, UserNotFoundException;

@@ -80,7 +80,7 @@ public class AccountService {
     public Transfer sendAmount(Transfer transfer){
         Transfer transfers = null;
         try{
-            transfers = restTemplate.exchange(baseUrl+"sendmoney",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
+            transfers = restTemplate.exchange(baseUrl+"transfers",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
         } catch (RestClientResponseException ex){
             System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
         } catch (ResourceAccessException ex){
@@ -89,8 +89,8 @@ public class AccountService {
         return transfers;
     }
 
-    public TransferSummary[] getTransferSummary(int accountId){
-        TransferSummary[] transferSummaries = restTemplate.exchange(baseUrl+"account/"+accountId+"/transfers",HttpMethod.GET,makeAuthEntity(), TransferSummary[].class).getBody();
+    public Transfer[] getTransferSummary(int accountId){
+        Transfer[] transferSummaries = restTemplate.exchange(baseUrl+"account/"+accountId+"/transfers",HttpMethod.GET,makeAuthEntity(), Transfer[].class).getBody();
         return transferSummaries;
     }
 

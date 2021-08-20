@@ -1,7 +1,6 @@
 package com.techelevator.tenmo.dao;
 
 import com.techelevator.tenmo.exceptions.TransferNotFoundException;
-import com.techelevator.tenmo.model.TransferSummary;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,22 +30,22 @@ public class JdbcTransferDao implements TransferDao{
         String query = "Select transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount From transfers Where transfer_id = ?";
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet(query, id);
         if (rowSet.next()){
-            return mapRowToUser(rowSet);
+            return mapRowToTransfer(rowSet);
         } else {
             throw new TransferNotFoundException();
         }
     }
 
     @Override
-    public List<TransferSummary> getTransactionsByAccountId(int accountId) {
-        List<TransferSummary> transferSummaries = new ArrayList<>();
+    public List<Transfer> getTransfers(int accountId) {
+        List<Transfer> transfers = new ArrayList<>();
         String query = "SELECT transfer_id, transfer_type_id, account_from, transfer_status_id, account_to, amount FROM transfers JOIN accounts ON transfers.account_from = accounts.account_id JOIN users ON accounts.user_id = users.user_id WHERE account_to = ? OR account_from = ?;";
         SqlRowSet results = jdbcTemplate.queryForRowSet(query,accountId,accountId);
         while(results.next()){
-            transferSummaries.add(mapRowToTransaction(results, accountId));
+            transfers.add(mapRowToTransfer(results));
         }
 
-        return transferSummaries;
+        return transfers;
     }
 
 
@@ -55,41 +54,39 @@ public class JdbcTransferDao implements TransferDao{
     public Transfer createTransfer(Transfer transfer) throws TransferNotFoundException {
         String query = "insert into transfers (transfer_type_id, transfer_status_id, account_from, account_to, amount) values(?,?,?,?,?) RETURNING transfer_id;";
 
-        Long id = jdbcTemplate.queryForObject(query,Long.class, transfer.getTransfer_type_id(),transfer.getTransfer_status_id(),transfer.getAccount_from(),transfer.getAccount_to(),transfer.getAmount());
+        Long id = jdbcTemplate.queryForObject(query,Long.class, transfer.getTransferTypeId(),transfer.getTransferStatusId(),transfer.getAccountFrom(),transfer.getAccountTo(),transfer.getAmount());
         return getTransfer(id);
     }
 
-    private TransferSummary mapRowToTransaction(SqlRowSet rs, int accountId){
-        TransferSummary transferSummary = new TransferSummary();
-        transferSummary.setTransfer_id(rs.getInt("transfer_id"));
-        int initiator = rs.getInt("account_from");
-        if(initiator == accountId){
-            User user  = userDao.findUserByAccountId(rs.getInt("account_to"));
-            transferSummary.setDirection("To");
-            transferSummary.setUsername(user.getUsername());
-            transferSummary.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
 
-        }
-        else{
-            User user  = userDao.findUserByAccountId(rs.getInt("account_from"));
-            transferSummary.setDirection("From");
-            transferSummary.setUsername(user.getUsername());
-            transferSummary.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
-        }
-        return transferSummary;
-
-    }
-
-    private Transfer mapRowToUser(SqlRowSet rs) {
+/*
+    private Transfer mapRowToTransfer(SqlRowSet rs) {
         Transfer transfer = new Transfer();
-        transfer.setTransfer_id(rs.getInt("transfer_id"));
-        transfer.setTransfer_type_id(rs.getInt("transfer_type_id"));
-        transfer.setTransfer_status_id(rs.getInt("transfer_status_id"));
-        transfer.setAccount_from(rs.getInt("account_from"));
-        transfer.setAccount_to(rs.getInt("account_to"));
+        transfer.setTransferId(rs.getInt("transfer_id"));
+        transfer.setTransferTypeId(rs.getInt("transfer_type_id"));
+        transfer.setTransferStatusId(rs.getInt("transfer_status_id"));
+        transfer.setAccountFrom(rs.getInt("account_from"));
+        transfer.setAccountTo(rs.getInt("account_to"));
         transfer.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
         return transfer;
     }
 
+*/
+    private Transfer mapRowToTransfer(SqlRowSet rs) {
+        Transfer transfer = new Transfer();
+        transfer.setTransferId(rs.getInt("transfer_id"));
+        transfer.setTransferTypeId(rs.getInt("transfer_type_id"));
+        transfer.setTransferStatusId(rs.getInt("transfer_status_id"));
+        int initiator = rs.getInt("account_from");
+        User fromUser =  userDao.findUserByAccountId(initiator);
+        int receiver = rs.getInt("account_to");
+        User toUser = userDao.findUserByAccountId(receiver);
+        transfer.setAccountFrom(initiator);
+        transfer.setFromUserName(fromUser.getUsername());
+        transfer.setAccountTo(receiver);
+        transfer.setToUserName(toUser.getUsername());
+        transfer.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
+        return transfer;
+}
 
 }

@@ -82,13 +82,19 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		boolean shouldCotinue = true;
 		while (shouldCotinue) {
 			Account userAccount = accountService.getAccountInfo(currentUser.getUser().getId());
-			TransferSummary[] allTransferSummaries = accountService.getTransferSummary(userAccount.getAccountId());
+			Transfer[] allTransferSummaries = accountService.getTransferSummary(userAccount.getAccountId());
 			System.out.println("-------------------------------------------");
 			System.out.println("Transfers");
 			System.out.println("ID          From/To                 Amount");
 			System.out.println("-------------------------------------------");
-			for(TransferSummary transferSummary : allTransferSummaries){
-				System.out.println(transferSummary.getTransfer_id()+"          "+ transferSummary.getDirection()+": "+ transferSummary.getUsername()+"    $"+ transferSummary.getAmount());
+			for(Transfer transferSummary : allTransferSummaries){
+				if(transferSummary.getAccountFrom() == userAccount.getAccountId()){
+					System.out.println(transferSummary.getTransferId()+"          "+"To"+": "+ transferSummary.getToUserName()+"    $"+ transferSummary.getAmount());
+				}
+				else{
+					System.out.println(transferSummary.getTransferId()+"          "+"From"+": "+ transferSummary.getFromUserName()+"    $"+ transferSummary.getAmount());
+				}
+
 			}
 
 			int response = console.getUserInputInteger("Please enter transfer ID to view details (0 to cancel): ");
@@ -101,13 +107,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				System.out.println("--------------------------------------------");
 				System.out.println("Transfer Details");
 				System.out.println("--------------------------------------------");
-				System.out.println("Id: " + transfer.getTransfer_id());
-				String fromUserName = accountService.getUserDetails(accountService.getAccountById(transfer.getAccount_from()).getUserid()).getUsername();
-				String toUserName = accountService.getUserDetails(accountService.getAccountById(transfer.getAccount_to()).getUserid()).getUsername();
-				System.out.println("From: " + fromUserName);
-				System.out.println("To: " + toUserName);
-				System.out.println("Type: " + (transfer.getTransfer_type_id() == 2 ? "Send" : "Request"));
-				System.out.println("Status: " + (transfer.getTransfer_status_id() == 1 ? "Pending" : transfer.getTransfer_status_id() == 2 ? "Approved" : "Rejected"));
+				System.out.println("Id: " + transfer.getTransferId());
+				System.out.println("From: " + transfer.getFromUserName());
+				System.out.println("To: " + transfer.getToUserName());
+				System.out.println("Type: " + (transfer.getTransferTypeId() == 2 ? "Send" : "Request"));
+				System.out.println("Status: " + (transfer.getTransferStatusId() == 1 ? "Pending" : transfer.getTransferStatusId() == 2 ? "Approved" : "Rejected"));
 				System.out.println("Amount: " + transfer.getAmount());
 			} else {
 				System.out.println("Invalid Transfer ID. Please enter a valid Transfer ID.");
@@ -140,12 +144,21 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			boolean askForAmount= true;
 			BigDecimal amount =  null;
 			while(askForAmount) {
-				 amount = new BigDecimal(console.getUserInputInteger("Enter the amount")).setScale(2, RoundingMode.HALF_UP);;
+				 amount = new BigDecimal(console.getUserInputDouble("Enter the amount")).setScale(2, RoundingMode.HALF_UP);;
 				try {
-					if(amount.compareTo(new BigDecimal("0.00")) == 0 ||amount.compareTo(new BigDecimal("0.00")) == -1 )
-						System.out.println("Please enter a number greater than 0");
+
+					if(amount.compareTo(accountService.getUserBalance().getBalance()) ==1){
+						System.out.println("Insufficient Funds. Current Balance $"+accountService.getUserBalance().getBalance());
+
+					}
 					else{
-						askForAmount = false;
+
+					if(amount.compareTo(new BigDecimal("0.00")) == 0 ||amount.compareTo(new BigDecimal("0.00")) == -1) {
+						System.out.println("Please enter an amount greater than $0");
+					}
+					else{
+							askForAmount = false;
+						}
 					}
 				}catch (Exception e){
 					System.out.println("Please enter a number");
@@ -158,10 +171,10 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			Account toAccount = accountService.getAccountInfo(choice);
 			if(fromAccount != null && toAccount != null) {
 				Transfer transfer = new Transfer();
-				transfer.setAccount_from(fromAccount.getAccountId());
-				transfer.setAccount_to(toAccount.getAccountId());
-				transfer.setTransfer_status_id(2);
-				transfer.setTransfer_type_id(2);
+				transfer.setAccountFrom(fromAccount.getAccountId());
+				transfer.setAccountTo(toAccount.getAccountId());
+				transfer.setTransferStatusId(2);
+				transfer.setTransferTypeId(2);
 				transfer.setAmount(amount);
 
 				transfer = accountService.sendAmount(transfer);
@@ -177,12 +190,8 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 
 
-
-
 		}
 
-//		User[] allUsers = restTemplate.exchange(API_BASE_URL+"users",HttpMethod.GET,makeAuthEntity(), User[].class).getBody();
-//		String choice = (String) console.getChoiceFromOptions(allUsers);
 		
 	}
 
@@ -233,6 +242,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	private void login() {
 		System.out.println("Please log in");
 		currentUser = null;
+		AccountService.setAuthToken("");
 		while (currentUser == null) //will keep looping until user is logged in
 		{
 			UserCredentials credentials = collectUserCredentials();

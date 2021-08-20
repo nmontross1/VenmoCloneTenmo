@@ -80,15 +80,14 @@ public class TenmoController {
         return returnValue;
     }
     @ResponseStatus(HttpStatus.CREATED)
-    @RequestMapping(path = "/sendmoney", method = RequestMethod.POST)
-    public Transfer sendMoney(@RequestBody Transfer transfer) throws InsufficientBalanceException, UserNotFoundException {
+    @RequestMapping(path = "/transfers", method = RequestMethod.POST)
+    public Transfer sendMoney(@RequestBody Transfer transfer) throws InsufficientBalanceException, UserNotFoundException, TransferNotFoundException {
 
-        User fromUser = userDao.findUserByAccountId(transfer.getAccount_from());
-        User toUser = userDao.findUserByAccountId(transfer.getAccount_to());
+        User fromUser = userDao.findUserByAccountId(transfer.getAccountFrom());
+        User toUser = userDao.findUserByAccountId(transfer.getAccountTo());
         Transfer returnValue = null;
             Balance balance = accountDAOao.getBalance(fromUser.getUsername());
             if(balance.getBalance().compareTo(transfer.getAmount()) >= 0){
-                //Create update balance method
                 BigDecimal diff = balance.getBalance().subtract(transfer.getAmount());
                 accountDAOao.updateBalance(fromUser.getId(), diff);
                 BigDecimal sum = accountDAOao.getBalance(toUser.getUsername()).getBalance().add(transfer.getAmount());
@@ -102,14 +101,20 @@ public class TenmoController {
     }
 
     @RequestMapping(path = "/account/{accountId}/transfers", method = RequestMethod.GET)
-    public List<TransferSummary> transferList(@PathVariable int accountId){
-        return transferDao.getTransactionsByAccountId(accountId);
+    public List<Transfer> transferList(@PathVariable int accountId){
+        return transferDao.getTransfers(accountId);
 
     }
 
     @RequestMapping(path = "/transfers/{transferId}", method = RequestMethod.GET)
-    public Transfer getTransferDetails(@PathVariable int transferId) throws TransferNotFoundException {
-        return transferDao.getTransfer(transferId);
+    public Transfer getTransferDetails(@PathVariable int transferId , Principal principal) throws TransferNotFoundException, UserNotFoundException {
+        Transfer transfer = transferDao.getTransfer(transferId);
+        //Check to see if the transfer details returning belongs to the user requesting
+        int accountId = accountDAOao.getAccountByUserId(userDao.findIdByUsername(principal.getName())).getAccountId();
+        if(transfer.getAccountFrom() == accountId || transfer.getAccountTo() == accountId){
+            return transfer;
+        }else
+            throw new TransferNotFoundException();
     }
 
 

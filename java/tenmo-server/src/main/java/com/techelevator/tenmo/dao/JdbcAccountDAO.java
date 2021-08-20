@@ -84,8 +84,10 @@ public class JdbcAccountDAO implements AccountDAO {
             String username = results.getString("username");
             balance = getBalance(username);
         }
+
         return balance;
     }
+
 
 
 }
