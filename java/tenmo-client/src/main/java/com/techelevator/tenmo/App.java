@@ -122,8 +122,45 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 	private void viewPendingRequests() {
 		// TODO Auto-generated method stub
-		
-	}
+		boolean shouldCotinue = true;
+		while (shouldCotinue) {
+			Account userAccount = accountService.getAccountInfo(currentUser.getUser().getId());
+			Transfer[] allTransferSummaries = accountService.getPendingTransfers(userAccount.getAccountId());
+			System.out.println("-------------------------------------------");
+			System.out.println("Pending Transfers");
+			System.out.println("ID          From/To                 Amount");
+			System.out.println("-------------------------------------------");
+			for (Transfer transferSummary : allTransferSummaries) {
+				if (transferSummary.getAccountFrom() == userAccount.getAccountId()) {
+					System.out.println(transferSummary.getTransferId() + "          " + "To" + ": " + transferSummary.getToUserName() + "    $" + transferSummary.getAmount());
+				} else {
+					System.out.println(transferSummary.getTransferId() + "          " + "From" + ": " + transferSummary.getFromUserName() + "    $" + transferSummary.getAmount());
+				}
+
+			}
+
+			int response = console.getUserInputInteger("Please enter transfer ID to approve/reject (0 to cancel): ");
+			if (response == 0) {
+				shouldCotinue = false;
+				break;
+			}
+			Transfer transfer = accountService.getTransferInfo(response);
+			if (transfer != null) {
+				System.out.println("--------------------------------------------");
+				System.out.println("Transfer Details");
+				System.out.println("--------------------------------------------");
+				System.out.println("Id: " + transfer.getTransferId());
+				System.out.println("From: " + transfer.getFromUserName());
+				System.out.println("To: " + transfer.getToUserName());
+				System.out.println("Type: " + (transfer.getTransferTypeId() == 2 ? "Send" : "Request"));
+				System.out.println("Status: " + (transfer.getTransferStatusId() == 1 ? "Pending" : transfer.getTransferStatusId() == 2 ? "Approved" : "Rejected"));
+				System.out.println("Amount: " + transfer.getAmount());
+			} else {
+				System.out.println("Invalid Transfer ID. Please enter a valid Transfer ID.");
+			}
+		}
+
+		}
 
 	private void sendBucks() {
 		boolean shouldCotinue = true;
@@ -145,7 +182,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			BigDecimal amount =  null;
 			while(askForAmount) {
 				 amount = new BigDecimal(console.getUserInputDouble("Enter the amount")).setScale(2, RoundingMode.HALF_UP);;
-				try {
+
 
 					if(amount.compareTo(accountService.getUserBalance().getBalance()) ==1){
 						System.out.println("Insufficient Funds. Current Balance $"+accountService.getUserBalance().getBalance());
@@ -160,9 +197,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 							askForAmount = false;
 						}
 					}
-				}catch (Exception e){
-					System.out.println("Please enter a number");
-				}
+
 
 
 			}
@@ -177,7 +212,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				transfer.setTransferTypeId(2);
 				transfer.setAmount(amount);
 
-				transfer = accountService.sendAmount(transfer);
+				transfer = accountService.sendTransfer(transfer);
 				shouldCotinue = false;
 			} else {
 				if(toAccount == null){
@@ -197,7 +232,61 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 
 	private void requestBucks() {
 		// TODO Auto-generated method stub
-		
+		boolean shouldCotinue = true;
+		while(shouldCotinue) {
+			User[] allUsers = accountService.getAllAvailableUsers();
+			System.out.println("-------------------------------------------");
+			System.out.println("Users");
+			System.out.println("ID            Name");
+			System.out.println("-------------------------------------------");
+			console.displayMenuOptions(allUsers);
+
+			int choice = console.getUserInputInteger("Enter ID of user you are requesting from (0 to cancel)");
+
+			if (choice == 0) {
+				shouldCotinue = false;
+				break;
+			}
+			boolean askForAmount= true;
+			BigDecimal amount =  null;
+			while(askForAmount) {
+				amount = new BigDecimal(console.getUserInputDouble("Enter the amount")).setScale(2, RoundingMode.HALF_UP);;
+
+
+						if(amount.compareTo(new BigDecimal("0.00")) == 0 ||amount.compareTo(new BigDecimal("0.00")) == -1) {
+							System.out.println("Please enter an amount greater than $0");
+						}
+						else{
+							askForAmount = false;
+						}
+					}
+
+			Account fromAccount = accountService.getAccountInfo(currentUser.getUser().getId());
+			Account toAccount = accountService.getAccountInfo(choice);
+			if(fromAccount != null && toAccount != null) {
+				Transfer transfer = new Transfer();
+				transfer.setAccountFrom(fromAccount.getAccountId());
+				transfer.setAccountTo(toAccount.getAccountId());
+				transfer.setTransferStatusId(1);
+				transfer.setTransferTypeId(1);
+				transfer.setAmount(amount);
+
+				transfer = accountService.sendTransfer(transfer);
+				shouldCotinue = false;
+			} else {
+				if(toAccount == null){
+					System.out.println(choice + " is not a valid ID. Please enter a valid ID.");
+				}
+				if(fromAccount == null){
+					System.out.println(currentUser.getUser().getId() + " is not a valid ID. Please enter a valid ID.");
+				}
+			}
+
+
+
+		}
+
+
 	}
 	
 	private void exitProgram() {

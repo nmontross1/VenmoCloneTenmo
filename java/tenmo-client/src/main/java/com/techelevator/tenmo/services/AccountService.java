@@ -77,7 +77,7 @@ public class AccountService {
         return account;
     }
 
-    public Transfer sendAmount(Transfer transfer){
+    public Transfer sendTransfer(Transfer transfer){
         Transfer transfers = null;
         try{
             transfers = restTemplate.exchange(baseUrl+"transfers",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
@@ -93,7 +93,10 @@ public class AccountService {
         Transfer[] transferSummaries = restTemplate.exchange(baseUrl+"account/"+accountId+"/transfers",HttpMethod.GET,makeAuthEntity(), Transfer[].class).getBody();
         return transferSummaries;
     }
-
+    public Transfer[] getPendingTransfers(int accountId){
+        Transfer[] transferSummaries = restTemplate.exchange(baseUrl+"account/"+accountId+"/transfers?isPending=true",HttpMethod.GET,makeAuthEntity(), Transfer[].class).getBody();
+        return transferSummaries;
+    }
     public Transfer getTransferInfo(int transferId){
         Transfer transfer = null;
         try{

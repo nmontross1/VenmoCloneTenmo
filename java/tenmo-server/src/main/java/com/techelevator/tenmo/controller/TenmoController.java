@@ -86,24 +86,40 @@ public class TenmoController {
         User fromUser = userDao.findUserByAccountId(transfer.getAccountFrom());
         User toUser = userDao.findUserByAccountId(transfer.getAccountTo());
         Transfer returnValue = null;
+
+        if(transfer.getTransferTypeId() == 2) {//If Send Request
             Balance balance = accountDAOao.getBalance(fromUser.getUsername());
-            if(balance.getBalance().compareTo(transfer.getAmount()) >= 0){
+            if (balance.getBalance().compareTo(transfer.getAmount()) >= 0) {
                 BigDecimal diff = balance.getBalance().subtract(transfer.getAmount());
                 accountDAOao.updateBalance(fromUser.getId(), diff);
                 BigDecimal sum = accountDAOao.getBalance(toUser.getUsername()).getBalance().add(transfer.getAmount());
                 accountDAOao.updateBalance(toUser.getId(), sum);
-                returnValue =  transferDao.createTransfer(transfer);
+                returnValue = transferDao.createTransfer(transfer);
 
-            }else{
+            } else {
                 throw new InsufficientBalanceException();
             }
 
+        }
+        else{
+            returnValue = transferDao.createTransfer(transfer);
+        }
 
         return returnValue;
     }
 
     @RequestMapping(path = "/account/{accountId}/transfers", method = RequestMethod.GET)
-    public List<Transfer> transferList(@PathVariable int accountId){
+    public List<Transfer> transferList(@PathVariable int accountId, @RequestParam(defaultValue = "false") boolean isPending){
+        if(isPending){
+            List<Transfer> filterList = new ArrayList<>();
+            for(Transfer transfer : transferDao.getTransfers(accountId)){
+                if(transfer.getTransferStatusId() == 1 && transfer.getAccountFrom() != accountId){
+                    filterList.add(transfer);
+                }
+            }
+            return filterList;
+        }
+
         return transferDao.getTransfers(accountId);
 
     }
