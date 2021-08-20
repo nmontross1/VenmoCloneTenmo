@@ -107,4 +107,15 @@ public class JdbcTransferDaoTests extends TenmoDaoTest{
 
         Assert.assertTrue(isExceptionThrown);
     }
+
+    @Test
+    public void updateTransfer_updates_transfer_Status_when_transfer_id_is_valid() throws TransferNotFoundException {
+        Transfer expected = new Transfer();
+        expected.setTransferId(3003);
+        expected.setTransferStatusId(2);
+
+        Transfer actual = sut.updateTransfer(expected);
+        Assert.assertEquals(expected.getTransferStatusId(),actual.getTransferStatusId());
+
+    }
 }

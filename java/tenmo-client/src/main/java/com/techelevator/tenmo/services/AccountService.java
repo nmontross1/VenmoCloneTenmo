@@ -27,7 +27,7 @@ public class AccountService {
             balance = restTemplate.exchange(baseUrl + "balance", HttpMethod.GET, makeAuthEntity(), Balance.class).getBody();
             return balance;
         } catch (RestClientResponseException ex){
-            System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
+            System.out.println( ex.getMessage());
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }
@@ -45,7 +45,7 @@ public class AccountService {
         try {
             user = restTemplate.exchange(baseUrl+"users/"+userId,HttpMethod.GET,makeAuthEntity(), User.class).getBody();
         } catch (RestClientResponseException ex){
-            System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
+            System.out.println( ex.getMessage());
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }
@@ -57,7 +57,7 @@ public class AccountService {
         try {
             account = restTemplate.exchange(baseUrl+"accounts/"+accountId,HttpMethod.GET,makeAuthEntity(), Account.class).getBody();
         } catch (RestClientResponseException ex){
-            System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
+            System.out.println(ex.getMessage());
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }
@@ -70,7 +70,7 @@ public class AccountService {
         try {
             account = restTemplate.exchange(baseUrl+"account?userid="+userid,HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
         } catch (RestClientResponseException ex){
-            System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
+            System.out.println( ex.getMessage());
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }
@@ -82,7 +82,8 @@ public class AccountService {
         try{
             transfers = restTemplate.exchange(baseUrl+"transfers",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
         } catch (RestClientResponseException ex){
-            System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
+            System.out.println(ex.getMessage());
+
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }
@@ -102,7 +103,7 @@ public class AccountService {
         try{
             transfer = restTemplate.exchange(baseUrl+"transfers/"+transferId,HttpMethod.GET, makeAuthEntity(), Transfer.class).getBody();
         } catch (RestClientResponseException ex){
-            System.out.println(ex.getRawStatusCode() + " : " + ex.getStatusText());
+            System.out.println(ex.getMessage());
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }

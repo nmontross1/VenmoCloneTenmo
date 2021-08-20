@@ -5,6 +5,7 @@ import com.techelevator.tenmo.services.AccountService;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.AuthenticationServiceException;
 import com.techelevator.view.ConsoleService;
+import jdk.swing.interop.SwingInterOpUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -158,9 +159,13 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 					} else if (selection == 1){
 						transfer.setTransferStatusId(2);
 						accountService.sendTransfer(transfer);
+						shouldLoop = false;
 					} else if(selection == 2){
 						transfer.setTransferStatusId(3);
 						accountService.sendTransfer(transfer);
+						shouldLoop = false;
+					} else{
+						System.out.println("Invalid selection. Please try again");
 					}
 				}
 			} else {
