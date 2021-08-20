@@ -79,15 +79,5 @@ public class Transfer {
         this.toUserName = toUserName;
     }
 
-    @Override
-    public String toString() {
-        return "Transfer{" +
-                "transfer_id=" + transferId +
-                ", transfer_type_id=" + transferTypeId +
-                ", transfer_status_id=" + transferStatusId +
-                ", account_from=" + accountFrom +
-                ", account_to=" + accountTo +
-                ", amount=" + amount +
-                '}';
-    }
+
 }
