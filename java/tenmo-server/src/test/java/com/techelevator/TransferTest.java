@@ -50,4 +50,18 @@ public class TransferTest {
         transfer.setAmount(new BigDecimal("1000.00"));
         Assert.assertTrue(new BigDecimal("1000.00").compareTo(transfer.getAmount()) == 0);
     }
+
+    @Test
+    public void get_from_username_returns_correct_username(){
+        Transfer transfer = new Transfer();
+        transfer.setFromUserName("testuser");
+        Assert.assertEquals("testuser", transfer.getFromUserName());
+    }
+
+    @Test
+    public void get_to_username_returns_correct_username(){
+        Transfer transfer = new Transfer();
+        transfer.setToUserName("testuser");
+        Assert.assertEquals("testuser", transfer.getToUserName());
+    }
 }
