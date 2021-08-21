@@ -47,7 +47,7 @@ public class JdbcAccountDAOTests extends TenmoDaoTest {
     }
 
     @Test
-    public void findAccountByUserId_returns_null_when_userid_is_invalid() throws AccountNotFoundException {
+    public void findAccountByUserId_returns_throws_exception_when_userid_is_invalid() throws AccountNotFoundException {
         boolean isExceptionThrown = false;
         try {
             Account actual = sut.getAccountByUserId(999999999);
