@@ -1,5 +1,10 @@
 package com.techelevator.tenmo.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.techelevator.tenmo.exception.ExceptionMapper;
 import com.techelevator.tenmo.model.*;
 import com.techelevator.view.ConsoleService;
 import org.springframework.http.HttpEntity;
@@ -8,6 +13,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
 
 public class AccountService {
 
@@ -26,8 +33,8 @@ public class AccountService {
         try {
             balance = restTemplate.exchange(baseUrl + "balance", HttpMethod.GET, makeAuthEntity(), Balance.class).getBody();
             return balance;
-        } catch (RestClientResponseException ex){
-            System.out.println( ex.getMessage());
+        }  catch (RestClientResponseException ex){
+            printExceptionMessage(ex);
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }
@@ -45,7 +52,7 @@ public class AccountService {
         try {
             user = restTemplate.exchange(baseUrl+"users/"+userId,HttpMethod.GET,makeAuthEntity(), User.class).getBody();
         } catch (RestClientResponseException ex){
-            System.out.println( ex.getMessage());
+            printExceptionMessage(ex);
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }
@@ -56,8 +63,8 @@ public class AccountService {
         Account account = null;
         try {
             account = restTemplate.exchange(baseUrl+"accounts/"+accountId,HttpMethod.GET,makeAuthEntity(), Account.class).getBody();
-        } catch (RestClientResponseException ex){
-            System.out.println(ex.getMessage());
+        }  catch (RestClientResponseException ex){
+            printExceptionMessage(ex);
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }
@@ -69,8 +76,8 @@ public class AccountService {
         Account account = null;
         try {
             account = restTemplate.exchange(baseUrl+"account?userid="+userid,HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
-        } catch (RestClientResponseException ex){
-            System.out.println( ex.getMessage());
+        }  catch (RestClientResponseException ex){
+            printExceptionMessage(ex);
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }
@@ -82,8 +89,7 @@ public class AccountService {
         try{
             transfers = restTemplate.exchange(baseUrl+"transfers",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
         } catch (RestClientResponseException ex){
-            System.out.println(ex.getStatusText());
-
+            printExceptionMessage(ex);
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }
@@ -93,9 +99,8 @@ public class AccountService {
         Transfer transfers = null;
         try{
             transfers = restTemplate.exchange(baseUrl+"transfers",HttpMethod.PUT, makeTransferEntity(transfer), Transfer.class).getBody();
-        } catch (RestClientResponseException ex){
-            System.out.println(ex.getMessage());
-
+        }  catch (RestClientResponseException ex){
+            printExceptionMessage(ex);
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }
@@ -114,7 +119,7 @@ public class AccountService {
         try{
             transfer = restTemplate.exchange(baseUrl+"transfers/"+transferId,HttpMethod.GET, makeAuthEntity(), Transfer.class).getBody();
         } catch (RestClientResponseException ex){
-            System.out.println(ex.getMessage());
+            printExceptionMessage(ex);
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
         }
@@ -142,5 +147,15 @@ public class AccountService {
     }
 
 
+    private void printExceptionMessage(RestClientResponseException ex){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            ExceptionMapper[] exceptionMappers = objectMapper.readValue(ex.getMessage().split(" : ")[1],ExceptionMapper[].class);
+            System.out.println(exceptionMappers[0].getMessage());
+        } catch (JsonProcessingException e) {
+            System.out.println(ex.getMessage());
+
+        }
+    }
 
 }

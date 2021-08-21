@@ -129,16 +129,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			Transfer[] allTransferSummaries = accountService.getPendingTransfers(userAccount.getAccountId());
 			System.out.println("-------------------------------------------");
 			System.out.println("Pending Transfers");
-			System.out.println("ID          From/To                 Amount");
+			System.out.println("ID          To                     Amount");
 			System.out.println("-------------------------------------------");
 			for (Transfer transferSummary : allTransferSummaries) {
-				if (transferSummary.getAccountFrom() == userAccount.getAccountId()) {
-					System.out.println(transferSummary.getTransferId() + "          " + "To" + ": " + transferSummary.getToUserName() + "    $" + transferSummary.getAmount());
-				} else {
-					System.out.println(transferSummary.getTransferId() + "          " + "From" + ": " + transferSummary.getFromUserName() + "    $" + transferSummary.getAmount());
+					System.out.println(transferSummary.getTransferId() + "        " + transferSummary.getFromUserName() + "                      $" + transferSummary.getAmount());
 				}
-
-			}
 
 			int response = console.getUserInputInteger("Please enter transfer ID to approve/reject (0 to cancel): ");
 			if (response == 0) {
@@ -169,7 +164,7 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 					}
 				}
 			} else {
-				System.out.println("Invalid Transfer ID. Please enter a valid Transfer ID.");
+				System.out.println("Please enter a valid Transfer ID.");
 			}
 
 		}
