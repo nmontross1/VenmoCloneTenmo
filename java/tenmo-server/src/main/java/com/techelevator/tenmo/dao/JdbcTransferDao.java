@@ -66,7 +66,6 @@ public class JdbcTransferDao implements TransferDao{
     }
 
 
-
     private Transfer mapRowToTransfer(SqlRowSet rs) {
         Transfer transfer = new Transfer();
         transfer.setTransferId(rs.getInt("transfer_id"));
@@ -82,6 +81,7 @@ public class JdbcTransferDao implements TransferDao{
         transfer.setToUserName(toUser.getUsername());
         transfer.setAmount(new BigDecimal(rs.getString("amount")).setScale(2, RoundingMode.HALF_UP));
         return transfer;
-}
+    }
+
 
 }

@@ -86,14 +86,14 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 			Transfer[] allTransferSummaries = accountService.getTransferSummary(userAccount.getAccountId());
 			System.out.println("-------------------------------------------");
 			System.out.println("Transfers");
-			System.out.println("ID          From/To                 Amount");
+			System.out.println("ID            From/To                 Amount");
 			System.out.println("-------------------------------------------");
 			for(Transfer transferSummary : allTransferSummaries){
 				if(transferSummary.getAccountFrom() == userAccount.getAccountId()){
-					System.out.println(transferSummary.getTransferId()+"          "+"To"+": "+ transferSummary.getToUserName()+"    $"+ transferSummary.getAmount());
+					System.out.println(transferSummary.getTransferId()+"          "+"To  "+": "+ transferSummary.getToUserName()+"                 $"+ transferSummary.getAmount());
 				}
 				else{
-					System.out.println(transferSummary.getTransferId()+"          "+"From"+": "+ transferSummary.getFromUserName()+"    $"+ transferSummary.getAmount());
+					System.out.println(transferSummary.getTransferId()+"          "+"From"+": "+ transferSummary.getFromUserName()+"                 $"+ transferSummary.getAmount());
 				}
 
 			}
@@ -114,6 +114,8 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 				System.out.println("Type: " + (transfer.getTransferTypeId() == 2 ? "Send" : "Request"));
 				System.out.println("Status: " + (transfer.getTransferStatusId() == 1 ? "Pending" : transfer.getTransferStatusId() == 2 ? "Approved" : "Rejected"));
 				System.out.println("Amount: " + transfer.getAmount());
+				console.getUserInput("Press Enter to return");
+
 			} else {
 				System.out.println("Invalid Transfer ID. Please enter a valid Transfer ID.");
 			}
@@ -158,11 +160,11 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 						shouldLoop = false;
 					} else if (selection == 1){
 						transfer.setTransferStatusId(2);
-						accountService.sendTransfer(transfer);
+						accountService.updateTransfer(transfer);
 						shouldLoop = false;
 					} else if(selection == 2){
 						transfer.setTransferStatusId(3);
-						accountService.sendTransfer(transfer);
+						accountService.updateTransfer(transfer);
 						shouldLoop = false;
 					} else{
 						System.out.println("Invalid selection. Please try again");

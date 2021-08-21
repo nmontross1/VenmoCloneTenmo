@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.dao;
 
+import com.techelevator.tenmo.exceptions.AccountNotFoundException;
 import com.techelevator.tenmo.exceptions.InsufficientBalanceException;
 import com.techelevator.tenmo.exceptions.UserNotFoundException;
 import com.techelevator.tenmo.model.Account;
@@ -56,7 +57,7 @@ public class JdbcAccountDAO implements AccountDAO {
     }
 
     @Override
-    public Account getAccountByUserId(int userId) {
+    public Account getAccountByUserId(int userId) throws AccountNotFoundException {
         Account account = null;
         String query = "SELECT account_id , user_id, balance from accounts where user_id = ?";
         SqlRowSet results = jdbcTemplate.queryForRowSet(query,userId);
@@ -66,7 +67,11 @@ public class JdbcAccountDAO implements AccountDAO {
             account.setAccountId(results.getInt("account_id"));
             account.setUserid(results.getInt("user_id"));
             account.setBalance(new BigDecimal(results.getString("balance")).setScale(2, RoundingMode.HALF_UP));
+        }else{
+            throw  new AccountNotFoundException();
         }
+
+
         return account;
     }
 

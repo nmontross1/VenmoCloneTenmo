@@ -89,7 +89,18 @@ public class AccountService {
         }
         return transfers;
     }
+    public Transfer updateTransfer(Transfer transfer){
+        Transfer transfers = null;
+        try{
+            transfers = restTemplate.exchange(baseUrl+"transfers",HttpMethod.PUT, makeTransferEntity(transfer), Transfer.class).getBody();
+        } catch (RestClientResponseException ex){
+            System.out.println(ex.getMessage());
 
+        } catch (ResourceAccessException ex){
+            System.out.println(ex.getMessage());
+        }
+        return transfers;
+    }
     public Transfer[] getTransferSummary(int accountId){
         Transfer[] transferSummaries = restTemplate.exchange(baseUrl+"account/"+accountId+"/transfers",HttpMethod.GET,makeAuthEntity(), Transfer[].class).getBody();
         return transferSummaries;

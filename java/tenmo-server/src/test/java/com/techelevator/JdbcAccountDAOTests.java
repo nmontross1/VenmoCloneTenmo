@@ -2,6 +2,7 @@ package com.techelevator;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.techelevator.tenmo.dao.JdbcAccountDAO;
+import com.techelevator.tenmo.exceptions.AccountNotFoundException;
 import com.techelevator.tenmo.exceptions.UserNotFoundException;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Balance;
@@ -31,7 +32,7 @@ public class JdbcAccountDAOTests extends TenmoDaoTest {
     }
 
     @Test
-    public void findAccountByUserId_returns_account_when_userId_is_valid(){
+    public void findAccountByUserId_returns_account_when_userId_is_valid() throws AccountNotFoundException {
         Account expected = new Account();
         expected.setAccountId(2001);
         expected.setUserid(1001);
@@ -46,7 +47,7 @@ public class JdbcAccountDAOTests extends TenmoDaoTest {
     }
 
     @Test
-    public void findAccountByUserId_returns_null_when_userid_is_invalid(){
+    public void findAccountByUserId_returns_null_when_userid_is_invalid() throws AccountNotFoundException {
         Account actual = sut.getAccountByUserId(999999999);
 
         Assert.assertNull(actual);

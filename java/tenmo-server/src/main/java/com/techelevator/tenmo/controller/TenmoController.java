@@ -1,8 +1,11 @@
 package com.techelevator.tenmo.controller;
 
+import com.techelevator.tenmo.constants.TransferStatus;
+import com.techelevator.tenmo.constants.TransferType;
 import com.techelevator.tenmo.dao.AccountDAO;
 import com.techelevator.tenmo.dao.TransferDao;
 import com.techelevator.tenmo.dao.UserDao;
+import com.techelevator.tenmo.exceptions.AccountNotFoundException;
 import com.techelevator.tenmo.exceptions.InsufficientBalanceException;
 import com.techelevator.tenmo.exceptions.TransferNotFoundException;
 import com.techelevator.tenmo.exceptions.UserNotFoundException;
@@ -22,28 +25,27 @@ import java.util.List;
 public class TenmoController {
 
     @Autowired
-    AccountDAO accountDAOao;
+    AccountDAO accountDao;
     @Autowired
     UserDao userDao;
-
     @Autowired
     TransferDao transferDao;
 
     @RequestMapping(path = "/balance", method = RequestMethod.GET)
     public Balance getBalance(Principal principal) throws UserNotFoundException{
 
-        return accountDAOao.getBalance(principal.getName());
+        return accountDao.getBalance(principal.getName());
     }
 
     @RequestMapping(path="/account")
-    public Account getAccount(@RequestParam int userid) throws UserNotFoundException {
-        return accountDAOao.getAccountByUserId(userid);
+    public Account getAccount(@RequestParam int userid) throws AccountNotFoundException {
+        return accountDao.getAccountByUserId(userid);
     }
 
     @RequestMapping(path="/accounts/{accountId}")
     public Account getAccountById(@PathVariable int accountId){
         Account returnValue  = null;
-        for (Account account : accountDAOao.findAll()){
+        for (Account account : accountDao.findAll()){
             if(account.getAccountId() == accountId){
                 returnValue = account;
                 break;
@@ -63,12 +65,11 @@ public class TenmoController {
             }
         }
 
-
         return filteredList;
     }
 
     @RequestMapping(path = "/users/{userId}", method = RequestMethod.GET)
-    public User getAllUser( @PathVariable int userId){
+    public User getUser( @PathVariable int userId){
         User returnValue  = null;
         for (User user : userDao.findAll()){
             if(user.getId() == userId){
@@ -81,50 +82,69 @@ public class TenmoController {
     }
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(path = "/transfers", method = RequestMethod.POST)
-    public Transfer sendMoney(@RequestBody Transfer transfer) throws InsufficientBalanceException, UserNotFoundException, TransferNotFoundException {
-
+    public Transfer createTransfer(@RequestBody Transfer transfer) throws InsufficientBalanceException, UserNotFoundException, TransferNotFoundException {
+        Transfer returnValue = null;
         User fromUser = userDao.findUserByAccountId(transfer.getAccountFrom());
         User toUser = userDao.findUserByAccountId(transfer.getAccountTo());
-        Transfer returnValue = null;
-
-        if(transfer.getTransferTypeId() == 2) {//If Send
-            Balance balance = accountDAOao.getBalance(fromUser.getUsername());
-            if (balance.getBalance().compareTo(transfer.getAmount()) >= 0) {
-                BigDecimal diff = balance.getBalance().subtract(transfer.getAmount());
-                accountDAOao.updateBalance(fromUser.getId(), diff);
-                BigDecimal sum = accountDAOao.getBalance(toUser.getUsername()).getBalance().add(transfer.getAmount());
-                accountDAOao.updateBalance(toUser.getId(), sum);
+        //CHECK IF USERS IN ACCOUNT IDS ARE INVALID
+        if(fromUser == null || toUser == null){
+            throw new UserNotFoundException();
+        }
+        //IF TRANSFER TYPE IS SEND
+        if(transfer.getTransferTypeId() == TransferType.SEND) {
+            Balance currentUserBalance = accountDao.getBalance(fromUser.getUsername());
+            //CHECK IF USER HAS ENOUGH MONEY ACCOUNT TO SEND
+            if (checkSufficientBalance(currentUserBalance,transfer.getAmount())) {
+                //UPDATE BALANCES AND CREATE NEW TRANSFER RECORD IN TRANSFER TABLE
+                accountDao.updateBalance(fromUser.getId(), currentUserBalance.getBalance().subtract(transfer.getAmount()));
+                accountDao.updateBalance(toUser.getId(), accountDao.getBalance(toUser.getUsername()).getBalance().add(transfer.getAmount()));
                 returnValue = transferDao.createTransfer(transfer);
 
             } else {
                 throw new InsufficientBalanceException();
             }
-
         }
-        else{//Request
-            if(transfer.getTransferStatusId() == 1) { //Pending
+        //ELSE IF TRANSFER TYPE IS REQUEST - ONLY PENDING TRANSFERS ARE ACCEPTED IN POST
+        else if(transfer.getTransferTypeId() == TransferType.REQUEST) {
+            //IS REQUEST TRANSFER PENDING
+            if(transfer.getTransferStatusId() == TransferStatus.PENDING) {
                 returnValue = transferDao.createTransfer(transfer);
             }
-            else if(transfer.getTransferStatusId()==2){ //If approved - change balance and update
-                Balance balance = accountDAOao.getBalance(toUser.getUsername());
+        }
+        return returnValue;
+    }
 
-                if (balance.getBalance().compareTo(transfer.getAmount()) >= 0) {
-                    BigDecimal diff = balance.getBalance().subtract(transfer.getAmount());
-                    accountDAOao.updateBalance(toUser.getId(), diff);
-                    BigDecimal sum = accountDAOao.getBalance(fromUser.getUsername()).getBalance().add(transfer.getAmount());
-                    accountDAOao.updateBalance(fromUser.getId(), sum);
+
+    @ResponseStatus(HttpStatus.CREATED)
+    @RequestMapping(path = "/transfers", method = RequestMethod.PUT)
+    public Transfer updateTransfer(@RequestBody Transfer transfer) throws InsufficientBalanceException, UserNotFoundException, TransferNotFoundException {
+        Transfer returnValue = null;
+        User fromUser = userDao.findUserByAccountId(transfer.getAccountFrom());
+        User toUser = userDao.findUserByAccountId(transfer.getAccountTo());
+        //CHECK IF USERS IN ACCOUNT IDS ARE INVALID
+        if(fromUser == null || toUser == null){
+            throw new UserNotFoundException();
+        }
+        //IF TRANSFER TYPE IS REQUEST - ONLY APPROVED AND REJECTED ARE ACCEPTED
+        if(transfer.getTransferTypeId() == TransferType.REQUEST) {
+            //IS REQUEST TRANSFER APPROVED
+             if(transfer.getTransferStatusId()==TransferStatus.APPROVED){
+                Balance currentUserBalance = accountDao.getBalance(toUser.getUsername());
+                    //CHECK IF USER HAS ENOUGH MONEY ACCOUNT TO SEND
+                if (checkSufficientBalance(currentUserBalance,transfer.getAmount())) {
+                    accountDao.updateBalance(toUser.getId(), currentUserBalance.getBalance().subtract(transfer.getAmount()));
+                    accountDao.updateBalance(fromUser.getId(), accountDao.getBalance(fromUser.getUsername()).getBalance().add(transfer.getAmount()));
                     returnValue = transferDao.updateTransfer(transfer);
 
                 } else {
                     throw new InsufficientBalanceException();
                 }
             }
-            else { // it was rejected
+            //IS REQUEST TRANSFER APPROVED
+            else if (transfer.getTransferStatusId()==TransferStatus.REJECTED){ // it was rejected
                 returnValue = transferDao.updateTransfer(transfer);
             }
-
         }
-
         return returnValue;
     }
 
@@ -145,10 +165,10 @@ public class TenmoController {
     }
 
     @RequestMapping(path = "/transfers/{transferId}", method = RequestMethod.GET)
-    public Transfer getTransferDetails(@PathVariable int transferId , Principal principal) throws TransferNotFoundException, UserNotFoundException {
+    public Transfer getTransferDetails(@PathVariable int transferId , Principal principal) throws TransferNotFoundException, AccountNotFoundException {
         Transfer transfer = transferDao.getTransfer(transferId);
         //Check to see if the transfer details returning belongs to the user requesting
-        int accountId = accountDAOao.getAccountByUserId(userDao.findIdByUsername(principal.getName())).getAccountId();
+        int accountId = accountDao.getAccountByUserId(userDao.findIdByUsername(principal.getName())).getAccountId();
         if(transfer.getAccountFrom() == accountId || transfer.getAccountTo() == accountId){
             return transfer;
         }else
@@ -156,5 +176,11 @@ public class TenmoController {
     }
 
 
+    private boolean checkSufficientBalance(Balance balance, BigDecimal amountToTransfer ){
+        if(balance.getBalance().compareTo(amountToTransfer) >= 0){
+            return true;
+        }
+        return false;
+    }
 
 }
