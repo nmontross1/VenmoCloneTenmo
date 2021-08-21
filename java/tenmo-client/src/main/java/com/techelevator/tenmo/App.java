@@ -79,7 +79,6 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void viewTransferHistory() {
-		// TODO Auto-generated method stub
 		boolean shouldCotinue = true;
 		while (shouldCotinue) {
 			Account userAccount = accountService.getAccountInfo(currentUser.getUser().getId());
@@ -124,7 +123,6 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 		}
 	}
 	private void viewPendingRequests() {
-		// TODO Auto-generated method stub
 		boolean shouldCotinue = true;
 		while (shouldCotinue) {
 			Account userAccount = accountService.getAccountInfo(currentUser.getUser().getId());
@@ -247,7 +245,6 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	}
 
 	private void requestBucks() {
-		// TODO Auto-generated method stub
 		boolean shouldCotinue = true;
 		while(shouldCotinue) {
 			User[] allUsers = accountService.getAllAvailableUsers();

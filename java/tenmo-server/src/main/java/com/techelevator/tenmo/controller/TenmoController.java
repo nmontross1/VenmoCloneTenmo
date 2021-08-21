@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.util.ArrayList;
@@ -82,7 +83,7 @@ public class TenmoController {
     }
     @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(path = "/transfers", method = RequestMethod.POST)
-    public Transfer createTransfer(@RequestBody Transfer transfer) throws InsufficientBalanceException, UserNotFoundException, TransferNotFoundException {
+    public Transfer createTransfer(@Valid @RequestBody Transfer transfer) throws InsufficientBalanceException, UserNotFoundException, TransferNotFoundException {
         Transfer returnValue = null;
         User fromUser = userDao.findUserByAccountId(transfer.getAccountFrom());
         User toUser = userDao.findUserByAccountId(transfer.getAccountTo());
@@ -115,9 +116,8 @@ public class TenmoController {
     }
 
 
-    @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(path = "/transfers", method = RequestMethod.PUT)
-    public Transfer updateTransfer(@RequestBody Transfer transfer) throws InsufficientBalanceException, UserNotFoundException, TransferNotFoundException {
+    public Transfer updateTransfer(@Valid @RequestBody Transfer transfer) throws InsufficientBalanceException, UserNotFoundException, TransferNotFoundException {
         Transfer returnValue = null;
         User fromUser = userDao.findUserByAccountId(transfer.getAccountFrom());
         User toUser = userDao.findUserByAccountId(transfer.getAccountTo());

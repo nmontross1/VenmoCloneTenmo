@@ -82,7 +82,7 @@ public class AccountService {
         try{
             transfers = restTemplate.exchange(baseUrl+"transfers",HttpMethod.POST, makeTransferEntity(transfer), Transfer.class).getBody();
         } catch (RestClientResponseException ex){
-            System.out.println(ex.getMessage());
+            System.out.println(ex.getStatusText());
 
         } catch (ResourceAccessException ex){
             System.out.println(ex.getMessage());
